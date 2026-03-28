@@ -1,0 +1,85 @@
+.login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--bg-primary);
+  padding: var(--space-md);
+}
+
+.login-container {
+  width: 100%;
+  max-width: 360px;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: var(--space-xxl);
+}
+
+.login-logo-pulse {
+  font-size: 48px;
+  color: var(--color-brand);
+}
+
+.login-title {
+  font-family: var(--font-sans);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-top: var(--space-md);
+}
+
+.login-subtitle {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-top: var(--space-xs);
+}
+
+.login-content {
+  margin-bottom: var(--space-xxl);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.login-hint {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  text-align: center;
+  margin-bottom: var(--space-md);
+}
+
+.code-input {
+  text-align: center;
+  font-size: 24px;
+  letter-spacing: 8px;
+  padding: var(--space-md);
+}
+
+.login-footer {
+  text-align: center;
+}
+
+.login-terms {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.5px;
+  line-height: 1.6;
+  margin-bottom: var(--space-md);
+}
+
+.demo-btn {
+  font-size: 12px;
+  padding: var(--space-sm) var(--space-md);
+}
+
+.btn-ghost {
+  margin-top: var(--space-sm);
+}

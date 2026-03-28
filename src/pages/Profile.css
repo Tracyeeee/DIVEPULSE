@@ -1,0 +1,342 @@
+.profile {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  padding-bottom: var(--space-xxl);
+}
+
+/* Header - Identity */
+.profile-header {
+  padding: var(--space-lg) var(--space-md);
+  border-bottom: 0.5px solid var(--color-border);
+}
+
+.identity-display {
+  cursor: pointer;
+}
+
+.nickname-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.nickname {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.edit-hint {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.uid-display {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+/* Nickname Edit */
+.nickname-edit {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.nickname-input {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: 0.5px solid var(--color-brand);
+  border-radius: var(--radius);
+  color: var(--color-text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  min-height: 44px;
+}
+
+.nickname-input:focus {
+  outline: none;
+}
+
+.nickname-input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.save-btn {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-brand);
+  border: none;
+  border-radius: var(--radius);
+  color: var(--bg-primary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+/* Stats Dashboard */
+.stats-dashboard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg) var(--space-md);
+  border-bottom: 0.5px solid var(--color-border);
+}
+
+.stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-brand);
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-divider {
+  width: 0.5px;
+  height: 40px;
+  background: var(--color-border);
+}
+
+/* Function List */
+.function-list {
+  padding: var(--space-md);
+}
+
+.function-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 var(--space-md);
+  border: 0.5px solid var(--color-border);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-instant);
+}
+
+.function-item:hover {
+  border-color: var(--color-brand);
+}
+
+.function-item.logout {
+  color: var(--color-error);
+}
+
+.function-item.logout:hover {
+  border-color: var(--color-error);
+}
+
+.function-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.function-item.logout .function-label {
+  color: var(--color-error);
+}
+
+.function-arrow {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+/* My Pulses List */
+.my-pulses-list {
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm);
+  background: rgba(0, 245, 255, 0.02);
+  border: 0.5px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.empty-pulses {
+  padding: var(--space-md);
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.my-pulse-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-sm);
+  border-bottom: 0.5px solid var(--color-border);
+}
+
+.my-pulse-item:last-child {
+  border-bottom: none;
+}
+
+.pulse-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pulse-location {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.pulse-stats {
+  font-size: 11px;
+  color: var(--color-brand);
+}
+
+.delete-btn {
+  padding: var(--space-xs) var(--space-sm);
+  background: transparent;
+  border: 0.5px solid var(--color-text-secondary);
+  border-radius: var(--radius);
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  cursor: pointer;
+  transition: all var(--transition-instant);
+}
+
+.delete-btn:hover {
+  border-color: var(--color-error);
+  color: var(--color-error);
+}
+
+/* Delete Confirm Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-md);
+}
+
+.delete-confirm-modal {
+  background: var(--bg-secondary);
+  border: 0.5px solid var(--color-border);
+  border-radius: calc(var(--radius) * 2);
+  padding: var(--space-lg);
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+  animation: modalIn 0.2s ease-out;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(231, 76, 60, 0.1);
+  color: var(--color-error);
+  font-size: 24px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-md);
+  font-family: var(--font-mono);
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.modal-content {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--space-lg);
+}
+
+.modal-match-info {
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.modal-btn {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-instant);
+}
+
+.modal-btn.cancel {
+  background: transparent;
+  border: 0.5px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+.modal-btn.cancel:hover {
+  border-color: var(--color-text-primary);
+  color: var(--color-text-primary);
+}
+
+.modal-btn.confirm {
+  background: var(--color-error);
+  border: 0.5px solid var(--color-error);
+  color: #fff;
+}
+
+.modal-btn.confirm:hover {
+  background: #c0392b;
+  border-color: #c0392b;
+}
+
+/* App Info */
+.app-info {
+  position: fixed;
+  bottom: 80px;
+  left: 0;
+  right: 0;
+  padding: var(--space-md);
+  text-align: center;
+}
+
+.app-version {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+}

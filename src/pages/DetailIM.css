@@ -1,0 +1,248 @@
+.detail-im {
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+/* Detail View */
+.detail-view .detail-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-bottom: 0.5px solid var(--color-border);
+}
+
+.detail-header .back-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-brand);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.detail-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.detail-content {
+  padding: var(--space-md);
+  padding-bottom: 100px;
+}
+
+.detail-location {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: var(--space-md);
+}
+
+.detail-meta {
+  display: flex;
+  gap: var(--space-lg);
+}
+
+.meta-item {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.detail-note {
+  margin-bottom: var(--space-lg);
+}
+
+.note-label {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-xs);
+}
+
+.note-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+}
+
+.detail-progress {
+  margin-bottom: var(--space-lg);
+}
+
+.progress-label {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-sm);
+}
+
+.progress-bar {
+  height: 4px;
+  background: var(--color-border);
+  border-radius: var(--radius);
+  margin-bottom: var(--space-xs);
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--color-brand);
+  border-radius: var(--radius);
+  transition: width var(--transition-instant);
+}
+
+.progress-text {
+  font-size: 14px;
+  color: var(--color-brand);
+}
+
+.detail-uid {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.uid-label {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+}
+
+.uid-value {
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+.btn-disabled {
+  background: var(--color-border) !important;
+  color: var(--color-text-secondary) !important;
+  cursor: default;
+}
+
+/* IM View */
+.im-view {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.im-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  border-bottom: 0.5px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.im-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.im-countdown {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.destruction-warning {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-primary);
+  border-bottom: 0.5px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.warning-text {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+}
+
+/* Messages */
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-md);
+}
+
+.message {
+  display: flex;
+  margin-bottom: var(--space-md);
+}
+
+.message-me {
+  justify-content: flex-end;
+}
+
+.message-other {
+  justify-content: flex-start;
+}
+
+.message-bubble {
+  max-width: 75%;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius);
+}
+
+.message-me .message-bubble {
+  border: 0.5px solid var(--color-brand);
+  background: transparent;
+}
+
+.message-other .message-bubble {
+  border: 0.5px solid var(--color-border);
+  background: transparent;
+}
+
+.message-text {
+  display: block;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: var(--space-xs);
+}
+
+.message-time {
+  display: block;
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  text-align: right;
+}
+
+/* Input Area */
+.im-input-area {
+  display: flex;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-top: 0.5px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.im-input {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: 0.5px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-primary);
+  font-size: 14px;
+  min-height: 44px;
+}
+
+.im-input:focus {
+  border-color: var(--color-brand);
+}
+
+.im-input::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.send-btn {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-brand);
+  border: none;
+  border-radius: var(--radius);
+  color: var(--bg-primary);
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 44px;
+  cursor: pointer;
+  transition: background var(--transition-instant);
+}
+
+.send-btn:hover {
+  background: var(--color-text-primary);
+}

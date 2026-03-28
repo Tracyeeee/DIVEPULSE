@@ -1,0 +1,83 @@
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 56px;
+  background: var(--bg-primary);
+  border-top: 0.5px solid var(--color-border);
+  z-index: var(--z-dropdown);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  height: 100%;
+  padding-bottom: 8px;
+  text-decoration: none;
+  color: var(--color-text-secondary);
+  transition: color var(--transition-instant);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+}
+
+.nav-item.active {
+  color: var(--color-brand);
+}
+
+.nav-icon {
+  font-size: 20px;
+  line-height: 1;
+  width: 20px;
+  text-align: center;
+}
+
+.nav-label {
+  font-size: 9px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+/* Center Post Button */
+.nav-item.post-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  bottom: 8px;
+  padding: 0;
+  justify-content: center;
+  align-items: center;
+}
+
+.post-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-brand);
+  color: var(--bg-primary);
+  font-size: 24px;
+  font-weight: 400;
+  border-radius: 4px;
+  line-height: 1;
+  transition: transform var(--transition-instant);
+}
+
+.nav-item.post-btn:hover .post-icon {
+  transform: scale(1.05);
+}
+
+.nav-item.post-btn .nav-label {
+  display: none;
+}

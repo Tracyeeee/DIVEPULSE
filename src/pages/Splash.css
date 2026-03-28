@@ -1,0 +1,33 @@
+.splash {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+.splash-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.splash-pulse {
+  font-size: 32px;
+  color: var(--color-brand);
+}
+
+.splash-text {
+  font-family: var(--font-sans);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.splash-status {
+  margin-top: var(--space-lg);
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}

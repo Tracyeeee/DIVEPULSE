@@ -1,0 +1,182 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String    @id @default(uuid())
+  uid         String    @unique  // DP-XXXX 格式
+  email       String    @unique
+  password    String
+  nickname    String?
+  avatar      String?
+  bio         String?
+  isAnonymous Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // 关系
+  pulses        Pulse[]
+  respects      Respect[]
+  matches       Match[]
+  comments      Comment[]
+  conversations ConversationParticipant[]
+  sentMessages  Message[] @relation("MessageSender")
+  receivedMessages Message[] @relation("MessageReceiver")
+  matchParticipants MatchParticipant[]
+}
+
+model Pulse {
+  id          String    @id @default(uuid())
+  userId      String
+  location    String
+  country     String?
+  visibility  Int       @default(10)    // 能见度 (米)
+  flow        String    @default("None") // 水流强度
+  temp        Float                      // 水温 (°C)
+  image       String
+  weight      Int?                       // 重量指数 1-100
+  geoHash     String?
+  depth       Int?                       // 深度
+  duration    Int?                       // 潜水时长 (分钟)
+  isAnonymous Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // 关系
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags        PulseTag[]
+  respects    Respect[]
+  comments    Comment[]
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Tag {
+  id     String     @id @default(uuid())
+  name   String     @unique
+  pulses PulseTag[]
+}
+
+model PulseTag {
+  pulseId String
+  tagId   String
+
+  pulse Pulse @relation(fields: [pulseId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([pulseId, tagId])
+}
+
+model Respect {
+  id        String   @id @default(uuid())
+  userId    String
+  pulseId   String
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pulse Pulse @relation(fields: [pulseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, pulseId])
+  @@index([pulseId])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  userId    String
+  pulseId   String
+  content   String
+  parentId  String?  // 回复功能
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pulse Pulse @relation(fields: [pulseId], references: [id], onDelete: Cascade)
+  parent Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies Comment[] @relation("CommentReplies")
+
+  @@index([pulseId])
+  @@index([parentId])
+}
+
+model Match {
+  id          String   @id @default(uuid())
+  userId      String
+  type        String   @default("BOAT") // BOAT, CAR, ROOM, TEAM
+  title       String
+  description String?
+  location    String
+  country     String?
+  startDate   DateTime
+  endDate     DateTime?
+  maxPeople   Int      @default(2)
+  status      String   @default("OPEN") // OPEN, FULL, CLOSED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  participants MatchParticipant[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([startDate])
+}
+
+model MatchParticipant {
+  id        String   @id @default(uuid())
+  matchId   String
+  userId    String
+  status    String   @default("PENDING") // PENDING, ACCEPTED, REJECTED, LEFT
+  createdAt DateTime @default(now())
+
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, userId])
+}
+
+model Conversation {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  id             String   @id @default(uuid())
+  conversationId String
+  userId         String
+  joinedAt       DateTime @default(now())
+  lastReadAt     DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, userId])
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  conversationId String
+  senderId       String
+  receiverId     String
+  content        String
+  type           String   @default("TEXT") // TEXT, IMAGE, SYSTEM
+  isRead         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver     User         @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([receiverId])
+}

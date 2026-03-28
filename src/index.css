@@ -1,0 +1,250 @@
+/* DivePulse (潜脉) v6.0 - Global Styles */
+/* Atomic Design Tokens - Minimalist Professionalism */
+
+:root {
+  /* Colors - High Contrast Black Theme */
+  --bg-primary: #000000;
+  --bg-secondary: #000000;
+  --color-brand: #00F5FF;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #888888;
+  --color-border: #333333;
+  --color-error: #FF4444;
+  --color-success: #00F5FF;
+  
+  /* Typography */
+  --font-mono: 'Roboto Mono', monospace;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-xxl: 48px;
+  
+  /* Border Radius - 2px Fixed */
+  --radius: 2px;
+  
+  /* Transitions - Instant Cut (0ms) */
+  --transition-instant: 0ms;
+  
+  /* Z-Index Scale */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+}
+
+/* Reset & Base */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Typography Utilities */
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand);
+}
+
+/* Selection */
+::selection {
+  background: var(--color-brand);
+  color: var(--bg-primary);
+}
+
+/* Focus States */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 1px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+/* Links */
+a {
+  color: var(--color-brand);
+  text-decoration: none;
+  transition: color var(--transition-instant);
+}
+
+a:hover {
+  color: var(--color-text-primary);
+}
+
+/* Buttons - Base */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+  transition: all var(--transition-instant);
+}
+
+/* Input Base */
+input, textarea {
+  font-family: var(--font-mono);
+  background: transparent;
+  border: 0.5px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-primary);
+  padding: var(--space-sm) var(--space-md);
+  transition: border-color var(--transition-instant);
+}
+
+input:focus, textarea:focus {
+  border-color: var(--color-brand);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--color-text-secondary);
+}
+
+/* Image */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Utility Classes */
+.container {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-sm {
+  gap: var(--space-sm);
+}
+
+.gap-md {
+  gap: var(--space-md);
+}
+
+.text-brand {
+  color: var(--color-brand);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+/* Animation - Instant Cut Effect */
+@keyframes instant-cut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-instant {
+  animation: instant-cut var(--transition-instant);
+}
+
+/* Flash Effect for Valid Click */
+@keyframes flash-brand {
+  0%, 100% {
+    border-color: var(--color-brand);
+  }
+  50% {
+    border-color: transparent;
+  }
+}
+
+.flash-valid {
+  animation: flash-brand 150ms ease-out;
+}
+
+/* Page Transition - Instant Cut */
+.page-enter {
+  opacity: 1;
+}
+
+.page-exit {
+  opacity: 1;
+}

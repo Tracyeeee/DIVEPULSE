@@ -1,0 +1,425 @@
+.pulse-feed {
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+/* Drawer Overlay - Click to close */
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: calc(var(--z-dropdown) - 1);
+}
+
+/* High-Volume Header - 80dp Full-width Console */
+.search-bar {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 80px;
+  margin: 0;
+  position: relative;
+  background: #000000;
+  border-bottom: 0.5px solid var(--color-brand);
+  z-index: var(--z-dropdown);
+}
+
+/* Top Row: Logo Only */
+.search-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-md);
+  height: 28px;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-logo {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-brand);
+  letter-spacing: 2px;
+}
+
+/* Bottom Row: Search Input + Divider + Filter */
+.search-bottom-row {
+  display: flex;
+  align-items: center;
+  height: 52px;
+}
+
+/* Left: Search Icon + Input */
+.search-input-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding-left: var(--space-sm);
+}
+
+/* Cyan Vertical Divider - 0.5pt */
+.search-divider {
+  width: 0.5pt;
+  height: 24px;
+  background: var(--color-brand);
+  flex-shrink: 0;
+}
+
+.search-icon {
+  width: 14px;
+  height: 14px;
+  color: var(--color-brand);
+  flex-shrink: 0;
+  margin-right: var(--space-sm);
+}
+
+.search-input {
+  flex: 1;
+  height: 100%;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-family: var(--font-mono);
+}
+
+.search-input:focus {
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: #666666;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+/* Right: Filter Icon - Aligned with search input */
+.filter-toggle {
+  width: 52px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color var(--transition-instant);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.filter-toggle:hover,
+.filter-toggle:focus {
+  color: var(--color-brand);
+  outline: none;
+}
+
+.filter-toggle.active {
+  color: var(--color-brand);
+}
+
+.filter-icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Cyan Active Label */
+.filter-active-label {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 9px;
+  font-family: var(--font-mono);
+  color: var(--color-brand);
+  font-weight: 600;
+}
+
+/* Cyan Pulse Animation - Active Border */
+@keyframes cyan-pulse {
+  0%, 100% { border-bottom-color: var(--color-brand); }
+  50% { border-bottom-color: rgba(0, 245, 255, 0.4); }
+}
+
+.search-bar.has-active-filter {
+  animation: cyan-pulse 2s ease-in-out infinite;
+}
+
+/* Integrated Filter Panel - Full-width dropdown below header */
+.filter-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #0D0D0D;
+  border-bottom: 1px solid var(--color-brand);
+  z-index: 200;
+  padding: var(--space-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.panel-section {
+  margin-bottom: var(--space-md);
+}
+
+.panel-section:last-of-type {
+  margin-bottom: var(--space-sm);
+}
+
+.section-header {
+  font-size: 10px;
+  color: var(--color-brand);
+  letter-spacing: 1px;
+  margin-bottom: var(--space-sm);
+}
+
+/* Filter Options - Horizontal Layout with better touch targets */
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.filter-option {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+  height: 36px;
+  padding: 0 var(--space-sm);
+  background: transparent;
+  border: 0.5px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--transition-instant);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.filter-option:hover,
+.filter-option:focus {
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+  outline: none;
+}
+
+.filter-option.active {
+  color: var(--color-brand);
+  border-color: var(--color-brand);
+  background: rgba(0, 245, 255, 0.1);
+}
+
+.check-mark {
+  font-size: 10px;
+  color: var(--color-brand);
+  margin-left: 4px;
+}
+
+/* Reset Filters Button */
+.reset-filters {
+  width: 100%;
+  padding: var(--space-sm);
+  background: transparent;
+  border: 0.5px dashed var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all var(--transition-instant);
+}
+
+.reset-filters:hover {
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+}
+
+/* Loading Bar */
+.loading-bar {
+  padding: var(--space-sm) var(--space-md);
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  border-bottom: 0.5px solid var(--color-border);
+}
+
+/* Pulse Feed Grid */
+.pulse-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-sm);
+  padding: var(--space-sm);
+}
+
+/* Pulse Card */
+.pulse-card {
+  background: var(--bg-primary);
+  border: 0.5px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.pulse-header {
+  padding: var(--space-sm);
+  border-bottom: 0.5px solid var(--color-border);
+  cursor: pointer;
+}
+
+.pulse-location {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.pulse-creator {
+  font-size: 9px;
+  color: var(--color-text-secondary);
+}
+
+.pulse-image-container {
+  position: relative;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.pulse-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pulse-top-badge {
+  position: absolute;
+  top: var(--space-xs);
+  right: var(--space-xs);
+  padding: 2px var(--space-xs);
+  background: var(--color-brand);
+  color: var(--bg-primary);
+  font-size: 9px;
+  font-weight: 600;
+  border-radius: var(--radius);
+}
+
+/* Enhanced Tags */
+.pulse-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: 0.5px solid var(--color-border);
+}
+
+.pulse-tag {
+  padding: 4px 8px;
+  background: rgba(0, 245, 255, 0.15);
+  border: 0.5px solid var(--color-brand);
+  border-radius: 2px;
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-instant);
+}
+
+.pulse-tag:hover {
+  background: rgba(0, 245, 255, 0.25);
+}
+
+.pulse-metrics {
+  padding: var(--space-sm);
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  border-top: 0.5px solid var(--color-border);
+  cursor: pointer;
+}
+
+.metric {
+  white-space: nowrap;
+}
+
+.metric-value {
+  color: var(--color-brand);
+}
+
+.metric-divider {
+  color: var(--color-text-primary);
+}
+
+.pulse-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-xs) var(--space-sm) var(--space-sm);
+}
+
+/* Comment Button */
+.comment-btn {
+  padding: 2px 6px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 10px;
+  cursor: pointer;
+  transition: color var(--transition-instant);
+}
+
+.comment-btn:hover {
+  color: var(--color-brand);
+}
+
+/* Minimalist Like Button - Pure Transparent, No Border, Bottom-Right Float */
+.like-btn {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color var(--transition-instant);
+}
+
+.like-btn:hover {
+  color: var(--color-brand);
+}
+
+.like-btn.liked {
+  color: var(--color-brand);
+}
+
+.heart-icon {
+  width: 12px;
+  height: 12px;
+  stroke-width: 1;
+}
+
+.like-count {
+  font-size: 10px;
+  font-family: var(--font-mono);
+}
+
+/* Empty State */
+.pulse-feed .empty-state {
+  padding: var(--space-xxl) var(--space-md);
+}
+
+.pulse-feed .empty-state-icon {
+  font-size: 48px;
+  color: var(--color-brand);
+  opacity: 0.3;
+}
