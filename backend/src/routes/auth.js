@@ -49,7 +49,11 @@ router.post(
 router.post(
   '/otp/send',
   [
-    body('email').isEmail().withMessage('请提供有效的邮箱'),
+    body('email')
+      .trim()
+      .isEmail()
+      .normalizeEmail()
+      .withMessage('请输入有效的邮箱地址'),
     validate
   ],
   authController.sendOtp

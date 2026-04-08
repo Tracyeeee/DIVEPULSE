@@ -17,8 +17,9 @@ export default function Login({ onLogin }) {
     setError('')
     setDebugCode('')
 
-    if (!email || !email.includes('@')) {
-      setError('INVALID_EMAIL')
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!email || !emailRegex.test(email)) {
+      setError('请输入有效的邮箱地址')
       return
     }
 
@@ -145,7 +146,7 @@ export default function Login({ onLogin }) {
             TERMS OF SERVICE
           </p>
           <button className="btn btn-outline demo-btn" onClick={handleDemoLogin}>
-            DEMO ACCESS
+            访客登录
           </button>
         </div>
       </div>
