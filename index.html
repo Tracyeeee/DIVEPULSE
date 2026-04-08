@@ -2,20 +2,36 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#000000" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="description" content="DivePulse - 全球潜水员专业水下情报与拼行协作工具" />
-    <!-- 不使用 Google Fonts：国内/微信内置浏览器易长时间阻塞，导致白屏与进度条卡住 -->
     <title>DivePulse 潜脉</title>
+    <!-- 关键 CSS：内联到 head，JS/CSS 未下载完之前页面已有样式，不黑屏 -->
     <style>
-      html, body { margin: 0; height: 100%; background: #000; color: #fff; }
-      #root { min-height: 100%; min-height: 100dvh; }
+      *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { height: 100%; background: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; }
+      #root { min-height: 100%; min-height: 100dvh; display: flex; flex-direction: column; }
+      .splash { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: #000; }
+      .splash-logo { display: flex; align-items: center; gap: 8px; }
+      .splash-pulse { font-size: 32px; color: #00F5FF; }
+      .splash-text { font-size: 24px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+      .splash-status { margin-top: 24px; font-size: 14px; color: #888; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .splash-pulse { animation: spin 1.2s linear infinite; }
     </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- 降级内容：JS 未执行时显示，带旋转动画 -->
+      <div class="splash">
+        <div class="splash-logo">
+          <span class="splash-pulse">◉</span>
+          <span class="splash-text">DivePulse</span>
+        </div>
+        <div class="splash-status">Loading...</div>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
