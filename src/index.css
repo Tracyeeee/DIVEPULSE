@@ -33,6 +33,7 @@
   /* Z-Index Scale */
   --z-base: 1;
   --z-dropdown: 100;
+  --z-overlay: 150;
   --z-modal: 200;
   --z-toast: 300;
 }

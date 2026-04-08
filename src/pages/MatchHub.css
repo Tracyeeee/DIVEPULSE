@@ -392,3 +392,189 @@
   border-color: #c0392b;
 }
 
+/* List Loading */
+.list-loading {
+  text-align: center;
+  padding: var(--space-lg);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+/* Participant Action Modal */
+.participant-action-modal {
+  background: var(--bg-secondary);
+  border: 0.5px solid var(--color-border);
+  border-radius: calc(var(--radius) * 2);
+  padding: var(--space-lg);
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+  animation: modalIn 0.2s ease-out;
+}
+
+.modal-hint {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+/* My Card — 主卡片行 */
+.match-card-mine {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.match-card-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+/* Participants Section */
+.participants-section {
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 0.5px solid var(--color-border);
+}
+
+.participants-label {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: var(--space-xs);
+}
+
+.participant-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-xs) 0;
+}
+
+.participant-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.participant-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.participant-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.participant-avatar span {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.participant-name {
+  font-size: 13px;
+  color: var(--color-text-primary);
+}
+
+.participant-status {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: var(--radius);
+}
+
+.participant-status.pending {
+  background: rgba(241, 196, 15, 0.12);
+  color: #f1c40f;
+  border: 0.5px solid rgba(241, 196, 15, 0.3);
+}
+
+.participant-status.confirmed {
+  background: rgba(46, 204, 113, 0.12);
+  color: #2ecc71;
+  border: 0.5px solid rgba(46, 204, 113, 0.3);
+}
+
+.participant-actions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.confirm-btn {
+  padding: 4px 10px;
+  background: var(--color-brand);
+  border: none;
+  border-radius: var(--radius);
+  color: var(--bg-primary);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity var(--transition-instant);
+}
+
+.confirm-btn:hover {
+  opacity: 0.8;
+}
+
+.reject-btn {
+  padding: 4px 10px;
+  background: transparent;
+  border: 0.5px solid var(--color-text-secondary);
+  border-radius: var(--radius);
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all var(--transition-instant);
+}
+
+.reject-btn:hover {
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+.confirmed-tag {
+  font-size: 11px;
+  color: #2ecc71;
+}
+
+.participants-empty {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  margin-top: var(--space-xs);
+  opacity: 0.6;
+}
+
+/* 错误/成功提示 */
+.publish-error {
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(255, 80, 80, 0.15);
+  border: 0.5px solid rgba(255, 80, 80, 0.4);
+  border-radius: var(--radius);
+  color: #ff6b6b;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.publish-success {
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(46, 204, 113, 0.15);
+  border: 0.5px solid rgba(46, 204, 113, 0.4);
+  border-radius: var(--radius);
+  color: #2ecc71;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+}

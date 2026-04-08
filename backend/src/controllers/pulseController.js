@@ -279,7 +279,7 @@ export const createPulse = async (req, res, next) => {
         visibility: visibility || 10,
         flow: flow || 'None',
         temp,
-        image,
+        image: image || null,
         weight: weight || null,
         geoHash: geoHash || null,
         depth: depth || null,

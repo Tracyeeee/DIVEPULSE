@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { safeGetItem, safeSetItem } from '../utils/safeStorage'
+import { FLOW_LABELS } from '../utils/constants'
 import './TagSearch.css'
 
 const ALL_PULSE_DATA = [
@@ -184,7 +185,7 @@ export default function TagSearch() {
               </span>
               <span className="metric-divider">|</span>
               <span className="metric">
-                <span className="metric-value">F:{item?.flow || 'None'}</span>
+                <span className="metric-value">F:{FLOW_LABELS[item?.flow] || item?.flow || 'None'}</span>
               </span>
               <span className="metric-divider">|</span>
               <span className="metric">

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import CommentDrawer from '../components/CommentDrawer'
 import { safeGetItem, safeSetItem } from '../utils/safeStorage'
+import { FLOW_LABELS } from '../utils/constants'
 import './PulseFeed.css'
 
 const INITIAL_PULSE_DATA = [
@@ -181,6 +182,15 @@ export default function PulseFeed() {
     }
     
     setCommentCounts(counts)
+  }, [])
+
+  // 监听新发布信号，刷新列表
+  useEffect(() => {
+    const stored = localStorage.getItem('pulsefeed_refresh')
+    if (stored) {
+      localStorage.removeItem('pulsefeed_refresh')
+      setSortBy('Latest')
+    }
   }, [])
 
   // 过滤和排序
@@ -378,12 +388,19 @@ export default function PulseFeed() {
               </div>
             </div>
             <div className="pulse-image-container" onClick={() => navigate(`/pulse/${item.id}`)}>
-              <img
-                src={item.image}
-                alt={item.location}
-                className="pulse-image"
-                loading="lazy"
-              />
+              {item.image ? (
+                <img
+                  src={item.image}
+                  alt={item.location}
+                  className="pulse-image"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="pulse-image-placeholder">
+                  <span className="pulse-image-placeholder-icon font-mono">◎</span>
+                  <span className="pulse-image-placeholder-text font-mono">无照片</span>
+                </div>
+              )}
               {item.weight > 45 && (
                 <span className="pulse-top-badge font-mono">TOP</span>
               )}
@@ -409,7 +426,7 @@ export default function PulseFeed() {
               </span>
               <span className="metric-divider">|</span>
               <span className="metric">
-                <span className="metric-value">F:{item.flow}</span>
+                <span className="metric-value">F:{FLOW_LABELS[item.flow] || item.flow}</span>
               </span>
               <span className="metric-divider">|</span>
               <span className="metric">

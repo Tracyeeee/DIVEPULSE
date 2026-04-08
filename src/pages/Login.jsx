@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { authApi } from '../utils/api'
 import './Login.css'
 
 export default function Login({ onLogin }) {
@@ -7,38 +8,76 @@ export default function Login({ onLogin }) {
   const [code, setCode] = useState('')
   const [step, setStep] = useState(1)
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [debugCode, setDebugCode] = useState('')
   const navigate = useNavigate()
 
-  const handleEmailSubmit = (e) => {
+  const handleEmailSubmit = async (e) => {
     e.preventDefault()
+    setError('')
+    setDebugCode('')
+
     if (!email || !email.includes('@')) {
       setError('INVALID_EMAIL')
       return
     }
-    setError('')
-    setStep(2)
+
+    setLoading(true)
+    try {
+      const res = await authApi.sendOtp(email)
+      setStep(2)
+      if (res.data?._debug) {
+        setDebugCode(res.data._debug)
+      }
+    } catch (err) {
+      setError(err.message || '发送失败，请重试')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleCodeSubmit = (e) => {
+  const handleCodeSubmit = async (e) => {
     e.preventDefault()
-    // Demo mode: accept any 6-digit code
+    setError('')
+
     if (code.length !== 6) {
       setError('INVALID_CODE')
       return
     }
-    onLogin(email)
-    navigate('/')
+
+    setLoading(true)
+    try {
+      const res = await authApi.loginWithOtp(email, code)
+      onLogin(res.data.token, res.data.user)
+      navigate('/')
+    } catch (err) {
+      setError(err.message || '验证码错误')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  // Demo: auto-fill code for testing
   const handleDemoLogin = () => {
-    onLogin('demo@divepulse.com')
+    // 使用特殊的 demo token，后端 auth 中间件会识别并返回 demo 用户
+    onLogin('tok_demo', { email: 'demo@divepulse.com', uid: 'DP-DEMO' })
     navigate('/')
   }
 
-  const handleResend = () => {
+  const handleResend = async () => {
     setCode('')
     setError('')
+    setDebugCode('')
+    setLoading(true)
+    try {
+      const res = await authApi.sendOtp(email)
+      if (res.data?._debug) {
+        setDebugCode(res.data._debug)
+      }
+    } catch (err) {
+      setError(err.message || '发送失败，请重试')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -60,17 +99,23 @@ export default function Login({ onLogin }) {
                   placeholder="EMAIL"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
                   autoFocus
                 />
               </div>
               {error && <div className="error">{error}</div>}
-              <button type="submit" className="btn btn-primary btn-full">
-                ACCESS
+              <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+                {loading ? 'SENDING...' : 'ACCESS'}
               </button>
             </form>
           ) : (
             <form onSubmit={handleCodeSubmit} className="login-form">
               <p className="login-hint">SENT_TO {email}</p>
+              {debugCode && (
+                <div className="debug-code">
+                  DEV: {debugCode}
+                </div>
+              )}
               <div className="input-group">
                 <input
                   type="text"
@@ -79,14 +124,15 @@ export default function Login({ onLogin }) {
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   maxLength={6}
+                  disabled={loading}
                   autoFocus
                 />
               </div>
               {error && <div className="error">{error}</div>}
-              <button type="submit" className="btn btn-primary btn-full">
-                VERIFY
+              <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+                {loading ? 'VERIFYING...' : 'VERIFY'}
               </button>
-              <button type="button" className="btn btn-ghost" onClick={handleResend}>
+              <button type="button" className="btn btn-ghost" onClick={handleResend} disabled={loading}>
                 RESEND
               </button>
             </form>

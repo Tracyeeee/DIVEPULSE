@@ -8,8 +8,8 @@ datasource db {
 }
 
 model User {
-  id          String    @id @default(uuid())
-  uid         String    @unique  // DP-XXXX 格式
+  id          String    @id @default(cuid())
+  uid         String    @unique
   email       String    @unique
   password    String
   nickname    String?
@@ -19,7 +19,6 @@ model User {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  // 关系
   pulses        Pulse[]
   respects      Respect[]
   matches       Match[]
@@ -31,23 +30,22 @@ model User {
 }
 
 model Pulse {
-  id          String    @id @default(uuid())
+  id          String    @id @default(cuid())
   userId      String
   location    String
   country     String?
-  visibility  Int       @default(10)    // 能见度 (米)
-  flow        String    @default("None") // 水流强度
-  temp        Float                      // 水温 (°C)
-  image       String
-  weight      Int?                       // 重量指数 1-100
+  visibility  Int       @default(10)
+  flow        String    @default("None")
+  temp        Float
+  image       String?
+  weight      Int?
   geoHash     String?
-  depth       Int?                       // 深度
-  duration    Int?                       // 潜水时长 (分钟)
+  depth       Int?
+  duration    Int?
   isAnonymous Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  // 关系
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   tags        PulseTag[]
   respects    Respect[]
@@ -58,7 +56,7 @@ model Pulse {
 }
 
 model Tag {
-  id     String     @id @default(uuid())
+  id     String     @id @default(cuid())
   name   String     @unique
   pulses PulseTag[]
 }
@@ -74,7 +72,7 @@ model PulseTag {
 }
 
 model Respect {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   userId    String
   pulseId   String
   createdAt DateTime @default(now())
@@ -87,11 +85,11 @@ model Respect {
 }
 
 model Comment {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   userId    String
   pulseId   String
   content   String
-  parentId  String?  // 回复功能
+  parentId  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -105,9 +103,9 @@ model Comment {
 }
 
 model Match {
-  id          String   @id @default(uuid())
+  id          String   @id @default(cuid())
   userId      String
-  type        String   @default("BOAT") // BOAT, CAR, ROOM, TEAM
+  type        String   @default("BOAT")
   title       String
   description String?
   location    String
@@ -115,7 +113,7 @@ model Match {
   startDate   DateTime
   endDate     DateTime?
   maxPeople   Int      @default(2)
-  status      String   @default("OPEN") // OPEN, FULL, CLOSED
+  status      String   @default("OPEN")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -128,10 +126,10 @@ model Match {
 }
 
 model MatchParticipant {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   matchId   String
   userId    String
-  status    String   @default("PENDING") // PENDING, ACCEPTED, REJECTED, LEFT
+  status    String   @default("PENDING")
   createdAt DateTime @default(now())
 
   match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
@@ -141,7 +139,7 @@ model MatchParticipant {
 }
 
 model Conversation {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -150,7 +148,7 @@ model Conversation {
 }
 
 model ConversationParticipant {
-  id             String   @id @default(uuid())
+  id             String   @id @default(cuid())
   conversationId String
   userId         String
   joinedAt       DateTime @default(now())
@@ -163,12 +161,12 @@ model ConversationParticipant {
 }
 
 model Message {
-  id             String   @id @default(uuid())
+  id             String   @id @default(cuid())
   conversationId String
   senderId       String
   receiverId     String
   content        String
-  type           String   @default("TEXT") // TEXT, IMAGE, SYSTEM
+  type           String   @default("TEXT")
   isRead         Boolean  @default(false)
   createdAt      DateTime @default(now())
 
@@ -179,4 +177,17 @@ model Message {
   @@index([conversationId])
   @@index([senderId])
   @@index([receiverId])
+}
+
+model OtpCode {
+  id        Int      @id @default(autoincrement())
+  email     String
+  code      String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@unique([email, code])
 }

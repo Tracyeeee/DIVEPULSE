@@ -10,6 +10,8 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.js",
+    "db:reset": "prisma db push --force-reset && node prisma/seed.js",
+    "setup": "node start.js",
     "lint": "eslint src/",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles --forceExit",
     "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage --detectOpenHandles --forceExit"

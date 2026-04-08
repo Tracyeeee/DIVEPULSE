@@ -35,9 +35,6 @@ const generateOtp = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-// 内存存储验证码 (生产环境应使用 Redis)
-const otpStore = new Map();
-
 /**
  * 发送OTP验证码
  * POST /api/auth/otp/send
@@ -49,11 +46,20 @@ export const sendOtp = async (req, res, next) => {
     // 生成6位验证码
     const code = generateOtp();
 
+    // 清理该邮箱的旧验证码（未使用的）
+    await prisma.otpCode.deleteMany({
+      where: { email, used: false }
+    });
+
     // 存储验证码 (5分钟有效期)
-    otpStore.set(email, {
-      code,
-      expiresAt: Date.now() + 5 * 60 * 1000,
-      attempts: 0
+    await prisma.otpCode.create({
+      data: {
+        email,
+        code,
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+        attempts: 0,
+        used: false
+      }
     });
 
     // TODO: 实际发送邮件
@@ -78,30 +84,50 @@ export const loginWithOtp = async (req, res, next) => {
   try {
     const { email, code } = req.body;
 
-    // 检查验证码
-    const otpData = otpStore.get(email);
+    // 查询最新未使用的验证码
+    const otpRecord = await prisma.otpCode.findFirst({
+      where: {
+        email,
+        code,
+        used: false,
+        expiresAt: { gt: new Date() }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
 
-    if (!otpData) {
-      return errorResponse(res, '请先获取验证码', 400);
+    if (!otpRecord) {
+      return errorResponse(res, '验证码错误或已过期', 400);
     }
 
-    if (Date.now() > otpData.expiresAt) {
-      otpStore.delete(email);
-      return errorResponse(res, '验证码已过期', 400);
+    if (otpRecord.attempts >= 3) {
+      // 标记为已使用，防止暴力破解
+      await prisma.otpCode.update({
+        where: { id: otpRecord.id },
+        data: { used: true }
+      });
+      return errorResponse(res, '验证码错误次数过多，请重新获取', 400);
     }
 
-    if (otpData.code !== code) {
-      // 增加尝试次数
-      otpData.attempts++;
-      if (otpData.attempts >= 3) {
-        otpStore.delete(email);
-        return errorResponse(res, '验证码错误次数过多，请重新获取', 400);
-      }
-      return errorResponse(res, '验证码错误', 400);
+    // 增加尝试次数
+    await prisma.otpCode.update({
+      where: { id: otpRecord.id },
+      data: { attempts: otpRecord.attempts + 1 }
+    });
+
+    // 验证码不匹配（已扣 attempts）
+    if (otpRecord.attempts + 1 >= 3) {
+      await prisma.otpCode.update({
+        where: { id: otpRecord.id },
+        data: { used: true }
+      });
+      return errorResponse(res, '验证码错误次数过多，请重新获取', 400);
     }
 
-    // 验证成功，删除验证码
-    otpStore.delete(email);
+    // 验证成功，标记为已使用
+    await prisma.otpCode.update({
+      where: { id: otpRecord.id },
+      data: { used: true }
+    });
 
     // 查找或创建用户
     let user = await prisma.user.findUnique({ where: { email } });

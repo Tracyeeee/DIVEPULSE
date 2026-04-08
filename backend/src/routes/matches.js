@@ -48,8 +48,8 @@ router.post(
   '/',
   authenticate,
   [
-    body('type').isIn(['BOAT', 'CAR', 'ROOM', 'TEAM']),
-    body('location').notEmpty().withMessage('请填写地点'),
+    body('type').optional().isIn(['BOAT', 'CAR', 'ROOM', 'TEAM']).withMessage('type 必须是 BOAT/CAR/ROOM/TEAM'),
+    body('location').optional({ nullable: true }).trim(),
     validate
   ],
   matchController.createMatch
@@ -89,6 +89,20 @@ router.post('/:id/leave', authenticate, matchController.leaveMatch);
  * @access  Private
  */
 router.get('/my/participating', authenticate, matchController.getMyParticipating);
+
+/**
+ * @route   POST /api/matches/:id/approve/:participantId
+ * @desc    确认加入（仅发起者）
+ * @access  Private
+ */
+router.post('/:id/approve/:participantId', authenticate, matchController.approveParticipant);
+
+/**
+ * @route   POST /api/matches/:id/reject/:participantId
+ * @desc    拒绝加入（仅发起者）
+ * @access  Private
+ */
+router.post('/:id/reject/:participantId', authenticate, matchController.rejectParticipant);
 
 /**
  * @route   GET /api/matches/my/created

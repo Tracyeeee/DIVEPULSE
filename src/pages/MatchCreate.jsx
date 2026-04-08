@@ -1,10 +1,23 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../App'
+import { matchApi } from '../utils/api'
 import './MatchCreate.css'
 
+const MATCH_TYPES = {
+  'BOAT': '拼船',
+  'CAR': '拼车',
+  'ROOM': '拼房',
+  'TEAM': '组队'
+}
+
 export default function MatchCreatePage() {
+  const { user } = useAuth()
   const navigate = useNavigate()
+  const token = user?.token || null
+
   const [formData, setFormData] = useState({
+    type: 'BOAT',
     location: '',
     country: '',
     date: '',
@@ -19,40 +32,71 @@ export default function MatchCreatePage() {
     requirements: []
   })
   const [showDatePicker, setShowDatePicker] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = () => {
-    const newMatch = {
-      id: Date.now(),
-      location: formData.location,
-      country: formData.country,
-      fullLocation: `${formData.country} - ${formData.location}`,
-      date: formData.date,
-      timeSlot: formData.timeSlot,
-      crewCount: formData.crewCount,
-      fee: formData.fee,
-      feeNote: formData.feeNote,
-      description: formData.description,
-      certification: formData.certification,
-      experience: formData.experience,
-      requirements: formData.requirements,
-      createdAt: new Date().toISOString(),
-      creatorUid: localStorage.getItem('divepulse_user') ? JSON.parse(localStorage.getItem('divepulse_user')).uid : 'GUEST',
-      status: 'open',
-      applicants: []
+  const handleSubmit = async () => {
+    if (!user) {
+      setError('请先登录')
+      return
     }
 
-    const savedMatches = localStorage.getItem('divepulse_matches')
-    const existingMatches = savedMatches ? JSON.parse(savedMatches) : []
-    localStorage.setItem('divepulse_matches', JSON.stringify([newMatch, ...existingMatches]))
+    setSubmitting(true)
+    setError('')
 
-    navigate('/match')
+    // 构建完整位置信息
+    const location = ((formData.country
+      ? `${formData.country} - ${formData.location}`
+      : formData.location) || '').trim()
+
+    // 格式化日期为 YYYY.MM.DD
+    const dateFormatted = formData.date ? formData.date.replace(/-/g, '.') : null
+
+    // 构建完整描述信息（包括费用、资质要求等）
+    const descriptionParts = []
+    if (formData.description) {
+      descriptionParts.push(formData.description)
+    }
+    if (formData.fee) {
+      descriptionParts.push(`费用预算：${formData.fee}`)
+    }
+    if (formData.feeNote) {
+      descriptionParts.push(`费用说明：${formData.feeNote}`)
+    }
+    if (formData.experience) {
+      descriptionParts.push(`潜水经验：${formData.experience}`)
+    }
+    if (formData.requirements.length > 0) {
+      descriptionParts.push(`资质要求：${formData.requirements.join('、')}`)
+    }
+
+    const fullDescription = descriptionParts.join('\n')
+
+    try {
+      await matchApi.createMatch({
+        type: formData.type,
+        location: location || null,
+        dateRange: { start: dateFormatted, end: null },
+        total: formData.crewCount,
+        description: fullDescription || null,
+        note: fullDescription || null
+      }, token)
+
+      // 通知 MatchHub 刷新列表
+      localStorage.setItem('matchhub_refresh', Date.now().toString())
+      navigate('/match')
+    } catch (err) {
+      setError(err.message || '发布失败，请重试')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const toggleRequirement = (req) => {
     if (formData.requirements.includes(req)) {
-      setFormData({...formData, requirements: formData.requirements.filter(r => r !== req)})
+      setFormData({ ...formData, requirements: formData.requirements.filter(r => r !== req) })
     } else {
-      setFormData({...formData, requirements: [...formData.requirements, req]})
+      setFormData({ ...formData, requirements: [...formData.requirements, req] })
     }
   }
 
@@ -61,63 +105,87 @@ export default function MatchCreatePage() {
       {/* Header */}
       <div className="match-header">
         <button className="match-back" onClick={() => navigate(-1)}>←</button>
-        <span className="match-title font-mono">CREATE MATCH</span>
-        <button className="match-submit font-mono" onClick={handleSubmit}>POST</button>
+        <span className="match-title font-mono">发起招募</span>
+        <button className="match-submit font-mono" disabled={submitting} onClick={handleSubmit}>
+          {submitting ? '发布中...' : '发布'}
+        </button>
       </div>
+
+      {error && (
+        <div className="match-create-error font-sans" onClick={() => setError('')}>
+          {error}
+        </div>
+      )}
 
       {/* Form */}
       <div className="match-form">
+        {/* Type */}
+        <div className="form-section">
+          <div className="section-label font-mono">类型</div>
+          <div className="type-selector">
+            {Object.entries(MATCH_TYPES).map(([key, label]) => (
+              <button
+                key={key}
+                className={`type-btn ${formData.type === key ? 'active' : ''}`}
+                onClick={() => setFormData({ ...formData, type: key })}
+              >
+                [{label}]
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Location */}
         <div className="form-section">
-          <div className="section-label font-mono">DESTINATION</div>
+          <div className="section-label font-mono">目的地</div>
           <div className="form-row">
             <input
               type="text"
               className="form-input"
-              placeholder="LOCATION NAME"
+              placeholder="输入地点名称..."
               value={formData.location}
-              onChange={e => setFormData({...formData, location: e.target.value})}
+              onChange={e => setFormData({ ...formData, location: e.target.value })}
             />
             <input
               type="text"
               className="form-input country-input"
-              placeholder="XX"
+              placeholder="国家"
               maxLength={2}
               value={formData.country}
-              onChange={e => setFormData({...formData, country: e.target.value.toUpperCase()})}
+              onChange={e => setFormData({ ...formData, country: e.target.value.toUpperCase() })}
             />
           </div>
         </div>
 
         {/* Time */}
         <div className="form-section">
-          <div className="section-label font-mono">DATE & TIME</div>
+          <div className="section-label font-mono">时间</div>
           <div className="time-row">
-            <button 
+            <button
               className={`time-type-btn ${formData.dateType === 'date' ? 'active' : ''}`}
               onClick={() => setFormData({...formData, dateType: 'date'})}
             >
-              SPECIFIC DATE
+              特定日期
             </button>
-            <button 
+            <button
               className={`time-type-btn ${formData.dateType === 'period' ? 'active' : ''}`}
               onClick={() => setFormData({...formData, dateType: 'period'})}
             >
-              TIME PERIOD
+              时间区间
             </button>
           </div>
           <div className="date-input-row">
-            <button 
+            <button
               className="date-value font-mono"
               onClick={() => setShowDatePicker(!showDatePicker)}
             >
-              {formData.date || 'SELECT DATE'}
+              {formData.date || '选择日期'}
             </button>
             {formData.dateType === 'period' && (
               <input
                 type="text"
                 className="form-input time-slot"
-                placeholder="e.g. Late April"
+                placeholder="如：4月下旬"
                 value={formData.timeSlot}
                 onChange={e => setFormData({...formData, timeSlot: e.target.value})}
               />
@@ -138,35 +206,35 @@ export default function MatchCreatePage() {
 
         {/* Crew */}
         <div className="form-section">
-          <div className="section-label font-mono">CREW SIZE</div>
+          <div className="section-label font-mono">人数</div>
           <div className="crew-selector">
-            <button 
+            <button
               className="crew-btn"
               onClick={() => setFormData({...formData, crewCount: Math.max(1, formData.crewCount - 1)})}
             >−</button>
             <span className="crew-count font-mono">{formData.crewCount}</span>
-            <button 
+            <button
               className="crew-btn"
               onClick={() => setFormData({...formData, crewCount: Math.min(20, formData.crewCount + 1)})}
             >+</button>
           </div>
-          <div className="crew-hint font-mono">LOOKING FOR {formData.crewCount} DIVERS</div>
+          <div className="crew-hint font-mono">招募 {formData.crewCount} 名潜水员</div>
         </div>
 
         {/* Fee */}
         <div className="form-section">
-          <div className="section-label font-mono">FEE SPLIT</div>
+          <div className="section-label font-mono">费用分摊</div>
           <input
             type="text"
             className="form-input"
-            placeholder="$ ESTIMATED COST PER PERSON"
+            placeholder="人均预算（如：2000元）"
             value={formData.fee}
             onChange={e => setFormData({...formData, fee: e.target.value})}
           />
           <input
             type="text"
             className="form-input"
-            placeholder="FEE NOTES (OPTIONAL)"
+            placeholder="费用备注（可选）"
             value={formData.feeNote}
             onChange={e => setFormData({...formData, feeNote: e.target.value})}
             style={{ marginTop: 'var(--space-sm)' }}
@@ -175,7 +243,7 @@ export default function MatchCreatePage() {
 
         {/* Requirements */}
         <div className="form-section">
-          <div className="section-label font-mono">REQUIREMENTS</div>
+          <div className="section-label font-mono">资质要求</div>
           <div className="req-chips">
             {['OW+', 'AOW+', 'RESCUE', 'NITROX', 'DEEP'].map(req => (
               <button
@@ -191,10 +259,10 @@ export default function MatchCreatePage() {
 
         {/* Description */}
         <div className="form-section">
-          <div className="section-label font-mono">DESCRIPTION</div>
+          <div className="section-label font-mono">描述</div>
           <textarea
             className="form-textarea"
-            placeholder="SHARE YOUR DIVE PLAN..."
+            placeholder="分享你的潜水计划..."
             value={formData.description}
             onChange={e => setFormData({...formData, description: e.target.value})}
             rows={5}

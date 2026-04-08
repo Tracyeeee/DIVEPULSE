@@ -73,23 +73,26 @@ export const getMatches = async (req, res, next) => {
             avatar: true
           }
         },
-        _count: {
-          select: { participants: true }
+        participants: {
+          where: { status: 'CONFIRMED' },
+          select: { id: true }
         }
       }
     });
 
     // 格式化响应，适配前端数据结构
+    // 人数只统计已确认（CONFIRMED）的参与者 + 发起者本人
     const formatted = matches.map(m => ({
       id: m.id,
       type: m.type,                    // BOAT, CAR, ROOM, TEAM
       location: m.location,
       dateRange: formatDateRange(m.startDate, m.endDate), // { start: "2026.04.05", end: "2026.04.10" }
-      current: m._count.participants + 1, // 包含发起者
+      current: m.participants.length + 1, // 含发起者本人
       total: m.maxPeople,
       status: m.status.toLowerCase(),
       uid: m.user.uid,               // 发起人 UID (DP-XXXX)
-      note: m.description,          // 备注
+      note: m.description,           // 备注
+      description: m.description,   // 完整描述
       createdAt: m.createdAt
     }));
 
@@ -142,11 +145,12 @@ export const getMatchById = async (req, res, next) => {
       type: match.type,
       location: match.location,
       dateRange: formatDateRange(match.startDate, match.endDate),
-      current: match.participants.length + 1,
+      current: match.participants.filter(p => p.status === 'CONFIRMED').length + 1,
       total: match.maxPeople,
       status: match.status.toLowerCase(),
       uid: match.user.uid,
       note: match.description,
+      description: match.description,
       user: match.user,
       participants: match.participants.map(p => ({
         id: p.id,
@@ -185,9 +189,13 @@ export const createMatch = async (req, res, next) => {
     } = req.body;
 
     // 兼容前端格式
-    const finalType = type; // BOAT, CAR, ROOM, TEAM
-    const finalLocation = location;
+    const finalType = (type || '').trim().toUpperCase() || 'BOAT'; // BOAT, CAR, ROOM, TEAM
+    const finalLocation = (location || '').trim();
     const finalCountry = country || '';
+
+    if (!finalLocation) {
+      return errorResponse(res, '请填写目的地', 400);
+    }
     
     // 处理日期: 支持 ISO8601 或前端格式 (YYYY.MM.DD)
     let finalStartDate = startDate;
@@ -242,6 +250,7 @@ export const createMatch = async (req, res, next) => {
       status: 'open',
       uid: match.user.uid,
       note: match.description,
+      description: match.description,
       createdAt: match.createdAt
     }, '发起成功', 201);
   } catch (error) {
@@ -345,7 +354,12 @@ export const joinMatch = async (req, res, next) => {
 
     const match = await prisma.match.findUnique({
       where: { id },
-      include: { _count: { select: { participants: true } } }
+      include: {
+        participants: {
+          where: { status: 'CONFIRMED' },
+          select: { id: true }
+        }
+      }
     });
 
     if (!match) {
@@ -354,7 +368,7 @@ export const joinMatch = async (req, res, next) => {
     if (match.userId === req.user.id) {
       return errorResponse(res, '不能参与自己发起的拼潜', 400);
     }
-    if (match._count.participants >= match.maxPeople - 1) {
+    if (match.participants.length >= match.maxPeople - 1) {
       return errorResponse(res, '拼潜已满员', 400);
     }
 
@@ -444,7 +458,10 @@ export const getMyParticipating = async (req, res, next) => {
                 avatar: true
               }
             },
-            _count: { select: { participants: true } }
+            participants: {
+              where: { status: 'CONFIRMED' },
+              select: { id: true }
+            }
           }
         }
       }
@@ -455,7 +472,7 @@ export const getMyParticipating = async (req, res, next) => {
       type: p.match.type,
       location: p.match.location,
       dateRange: formatDateRange(p.match.startDate, p.match.endDate),
-      current: p.match._count.participants + 1,
+      current: p.match.participants.length + 1, // 含发起者
       total: p.match.maxPeople,
       status: p.match.status.toLowerCase(),
       uid: p.match.user.uid,
@@ -470,7 +487,93 @@ export const getMyParticipating = async (req, res, next) => {
 };
 
 /**
- * 获取我发起的拼潜
+ * 确认加入（仅发起者）
+ * POST /api/matches/:id/approve/:participantId
+ */
+export const approveParticipant = async (req, res, next) => {
+  try {
+    const { id, participantId } = req.params;
+
+    const match = await prisma.match.findUnique({ where: { id } });
+    if (!match) {
+      return errorResponse(res, '拼潜不存在', 404);
+    }
+    if (match.userId !== req.user.id) {
+      return errorResponse(res, '只有发起者可以确认加入', 403);
+    }
+
+    const participant = await prisma.matchParticipant.findUnique({
+      where: { id: participantId }
+    });
+    if (!participant) {
+      return errorResponse(res, '该申请不存在', 404);
+    }
+    if (participant.matchId !== id) {
+      return errorResponse(res, '该申请不属于此拼潜', 400);
+    }
+    if (participant.status === 'CONFIRMED') {
+      return errorResponse(res, '该用户已确认加入', 400);
+    }
+
+    const updated = await prisma.matchParticipant.update({
+      where: { id: participantId },
+      data: { status: 'CONFIRMED' },
+      include: {
+        user: {
+          select: { id: true, uid: true, nickname: true, avatar: true }
+        }
+      }
+    });
+
+    return successResponse(res, {
+      id: updated.id,
+      status: updated.status.toLowerCase(),
+      user: updated.user
+    }, '已确认该用户加入');
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * 拒绝加入（仅发起者）
+ * POST /api/matches/:id/reject/:participantId
+ */
+export const rejectParticipant = async (req, res, next) => {
+  try {
+    const { id, participantId } = req.params;
+
+    const match = await prisma.match.findUnique({ where: { id } });
+    if (!match) {
+      return errorResponse(res, '拼潜不存在', 404);
+    }
+    if (match.userId !== req.user.id) {
+      return errorResponse(res, '只有发起者可以拒绝加入', 403);
+    }
+
+    const participant = await prisma.matchParticipant.findUnique({
+      where: { id: participantId }
+    });
+    if (!participant) {
+      return errorResponse(res, '该申请不存在', 404);
+    }
+    if (participant.matchId !== id) {
+      return errorResponse(res, '该申请不属于此拼潜', 400);
+    }
+    if (participant.status === 'CONFIRMED') {
+      return errorResponse(res, '已确认用户无法被拒绝，请先将其移除', 400);
+    }
+
+    await prisma.matchParticipant.delete({ where: { id: participantId } });
+
+    return successResponse(res, null, '已拒绝该申请');
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * 获取我发起的拼潜（含申请人列表）
  * GET /api/matches/my/created
  */
 export const getMyCreated = async (req, res, next) => {
@@ -480,11 +583,21 @@ export const getMyCreated = async (req, res, next) => {
       orderBy: { createdAt: 'desc' },
       include: {
         user: {
+          select: { uid: true }
+        },
+        _count: {
           select: {
-            uid: true
+            participants: { where: { status: 'CONFIRMED' } }
           }
         },
-        _count: { select: { participants: true } }
+        participants: {
+          include: {
+            user: {
+              select: { id: true, uid: true, nickname: true, avatar: true }
+            }
+          },
+          orderBy: { createdAt: 'asc' }
+        }
       }
     });
 
@@ -493,12 +606,19 @@ export const getMyCreated = async (req, res, next) => {
       type: m.type,
       location: m.location,
       dateRange: formatDateRange(m.startDate, m.endDate),
-      current: m._count.participants + 1,
+      current: m._count.participants + 1, // 只含已确认 + 发起者本人
       total: m.maxPeople,
       status: m.status.toLowerCase(),
       uid: m.user.uid,
       note: m.description,
-      createdAt: m.createdAt
+      description: m.description,
+      createdAt: m.createdAt,
+      participants: m.participants.map(p => ({
+        id: p.id,
+        status: p.status.toLowerCase(),
+        user: p.user,
+        createdAt: p.createdAt
+      }))
     }));
 
     return successResponse(res, formatted);

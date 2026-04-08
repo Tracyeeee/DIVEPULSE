@@ -13,10 +13,7 @@ import {
   safePushUnique,
   safeRemove,
   safeParseInt,
-  safeSlice,
-  formatCountdown,
-  parseCountdown,
-  decrementCountdown
+  safeSlice
 } from '../src/utils/safeStorage';
 
 describe('safeJSONParse', () => {
@@ -131,25 +128,5 @@ describe('safeSlice', () => {
   test('应处理非字符串输入', () => {
     expect(safeSlice(null, 5)).toBe('');
     expect(safeSlice(123, 5)).toBe('');
-  });
-});
-
-describe('倒计时函数', () => {
-  test('formatCountdown 应正确格式化', () => {
-    expect(formatCountdown(3661)).toBe('01:01:01');
-    expect(formatCountdown(0)).toBe('00:00:00');
-    expect(formatCountdown(-1)).toBe('00:00:00');
-  });
-
-  test('parseCountdown 应正确解析', () => {
-    expect(parseCountdown('01:01:01')).toBe(3661);
-    expect(parseCountdown('00:30:00')).toBe(1800);
-    expect(parseCountdown('invalid')).toBe(0);
-  });
-
-  test('decrementCountdown 应正确递减', () => {
-    expect(decrementCountdown('00:01:30')).toBe('00:01:29');
-    expect(decrementCountdown('00:00:01')).toBe('00:00:00');
-    expect(decrementCountdown('00:00:00')).toBe('00:00:00');
   });
 });

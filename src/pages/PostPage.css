@@ -14,7 +14,7 @@
   position: sticky;
   top: 0;
   background: var(--bg-primary);
-  z-index: var(--z-base);
+  z-index: var(--z-modal);
 }
 
 .post-back {
@@ -161,6 +161,76 @@
   flex-shrink: 0;
 }
 
+/* Photo Upload Grid */
+.photo-upload-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-sm);
+}
+
+.photo-preview-item {
+  position: relative;
+  aspect-ratio: 4/3;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 0.5px solid var(--color-border);
+}
+
+.photo-preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-remove-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.photo-upload-add {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  aspect-ratio: 4/3;
+  border: 0.5px dashed var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--transition-instant);
+}
+
+.photo-upload-add:hover {
+  border-color: var(--color-brand);
+}
+
+.photo-upload-input {
+  display: none;
+}
+
+.photo-upload-icon {
+  font-size: 20px;
+  color: var(--color-text-secondary);
+}
+
+.photo-upload-text {
+  font-size: 10px;
+  color: var(--color-text-secondary);
+}
+
 /* Date Selector */
 .date-selector {
   display: flex;
@@ -205,7 +275,8 @@
 
 /* Stats */
 .form-stats {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--space-sm);
 }
 
@@ -234,18 +305,11 @@
   color: var(--color-text-primary);
   font-size: 13px;
   min-width: 0;
+  caret-color: var(--color-brand);
 }
 
 .stat-field:focus {
   outline: none;
-}
-
-.stat-field select {
-  background: transparent;
-  border: none;
-  color: var(--color-text-primary);
-  font-size: 13px;
-  cursor: pointer;
 }
 
 .stat-unit {

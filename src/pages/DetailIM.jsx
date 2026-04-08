@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../App'
-import { decrementCountdown, formatCountdown, parseCountdown } from '../utils/safeStorage'
+import { safeGetItem, safeSetItem } from '../utils/safeStorage'
 import './DetailIM.css'
 
 const SAMPLE_DETAIL = {
@@ -13,8 +13,7 @@ const SAMPLE_DETAIL = {
     current: 2,
     total: 6,
     uid: 'DP-7729',
-    note: '晨潜，寻找潜伴。计划早上6点出发，3次潜水。有兴趣的朋友请联系我。',
-    expiry: '48:00:00'
+    note: '晨潜，寻找潜伴。计划早上6点出发，3次潜水。有兴趣的朋友请联系我。'
   },
   2: {
     id: 2,
@@ -24,8 +23,7 @@ const SAMPLE_DETAIL = {
     current: 1,
     total: 4,
     uid: 'DP-3341',
-    note: '需要拼车从机场到酒店，预计下午2点到达。',
-    expiry: '47:30:00'
+    note: '需要拼车从机场到酒店，预计下午2点到达。'
   },
   3: {
     id: 3,
@@ -35,8 +33,7 @@ const SAMPLE_DETAIL = {
     current: 0,
     total: 2,
     uid: 'DP-5567',
-    note: '寻找潜水行程的潜伴一起平摊住宿费。',
-    expiry: '46:00:00'
+    note: '寻找潜水行程的潜伴一起平摊住宿费。'
   },
   4: {
     id: 4,
@@ -46,8 +43,7 @@ const SAMPLE_DETAIL = {
     current: 3,
     total: 4,
     uid: 'DP-8892',
-    note: 'Fun Dive组队，目前3人，还差1人。',
-    expiry: '45:00:00'
+    note: 'Fun Dive组队，目前3人，还差1人。'
   },
   5: {
     id: 5,
@@ -57,8 +53,7 @@ const SAMPLE_DETAIL = {
     current: 4,
     total: 8,
     uid: 'DP-2214',
-    note: '船宿行程，7天6夜。还差4人。',
-    expiry: '44:00:00'
+    note: '船宿行程，7天6夜。还差4人。'
   }
 }
 
@@ -84,7 +79,6 @@ export default function DetailIM() {
   const [connected, setConnected] = useState(false)
   const [messages, setMessages] = useState([])
   const [inputText, setInputText] = useState('')
-  const [countdown, setCountdown] = useState('48:00:00')
   const messagesEndRef = useRef(null)
 
   // 安全获取详情数据
@@ -100,30 +94,22 @@ export default function DetailIM() {
     messagesEndRef.current?.scrollIntoView()
   }, [messages])
 
-  // 安全的倒计时递减
-  useEffect(() => {
-    let timer
-    if (connected) {
-      // 初始化倒计时
-      if (detail?.expiry) {
-        setCountdown(detail.expiry)
-      }
-      
-      timer = setInterval(() => {
-        setCountdown(prev => {
-          const totalSeconds = parseCountdown(prev)
-          if (totalSeconds <= 0) {
-            clearInterval(timer)
-            return '00:00:00'
-          }
-          return decrementCountdown(prev)
-        })
-      }, 1000)
-    }
-    return () => clearInterval(timer)
-  }, [connected, detail?.expiry])
-
   const handleConnect = () => {
+    const currentTime = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    const convId = `match_${detail.id}_${Date.now()}`
+    const newConversation = {
+      id: convId,
+      uid: detail.uid,
+      matchId: detail.id,
+      lastMessage: SAMPLE_MESSAGES[0]?.text || '',
+      lastTime: currentTime,
+      read: false,
+      messages: SAMPLE_MESSAGES.map(msg => ({ ...msg }))
+    }
+    const existing = safeGetItem('divepulse_conversations', [])
+    const updated = [newConversation, ...(Array.isArray(existing) ? existing : [])]
+    safeSetItem('divepulse_conversations', updated)
+    window.dispatchEvent(new Event('divepulse_conversations_updated'))
     setConnected(true)
     setView('im')
   }
@@ -160,14 +146,6 @@ export default function DetailIM() {
             ← 返回
           </button>
           <span className="im-title font-mono">{detail?.uid || '???'}</span>
-          <span className="im-countdown font-mono">{countdown}</span>
-        </div>
-
-        {/* Destruction Warning */}
-        <div className="destruction-warning">
-          <span className="warning-text font-mono">
-            消息将于 {countdown} 后物理销毁
-          </span>
         </div>
 
         {/* Messages */}
@@ -177,7 +155,13 @@ export default function DetailIM() {
               key={msg?.id || Date.now()}
               className={`message ${msg?.sender === 'me' ? 'message-me' : 'message-other'}`}
             >
-              <div className="message-bubble">
+              <div
+                className="message-bubble"
+                style={msg?.sender === 'me'
+                  ? { background: '#00F5FF', color: '#000000' }
+                  : { background: 'rgba(255,255,255,0.06)', border: '0.5px solid #333333', color: '#FFFFFF' }
+                }
+              >
                 <span className="message-text">{msg?.text || ''}</span>
                 <span className="message-time font-mono">{msg?.time || '??:??'}</span>
               </div>

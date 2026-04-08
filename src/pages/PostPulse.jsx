@@ -1,44 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../App'
+import { FLOW_LABELS, LOCATION_SUGGESTIONS, PRESET_TAGS } from '../utils/constants'
+import FlowSelect from '../components/FlowSelect'
+import '../components/FlowSelect.css'
 import './PostPulse.css'
-
-const LOCATION_SUGGESTIONS = [
-  { name: '仙本那', country: 'MY', display: '马来西亚 - 仙本那' },
-  { name: '四王群岛', country: 'ID', display: '印尼 - 四王群岛' },
-  { name: '妈妈拍丝瓜岛', country: 'PH', display: '菲律宾 - 妈妈拍丝瓜岛' },
-  { name: '红海', country: 'EG', display: '埃及 - 红海' },
-  { name: '长滩岛', country: 'PH', display: '菲律宾 - 长滩岛' },
-  { name: '斯米兰', country: 'TH', display: '泰国 - 斯米兰' },
-  { name: '马尔代夫', country: 'MV', display: '马尔代夫' },
-  { name: '帕劳', country: 'PW', display: '帕劳' },
-  { name: '大堡礁', country: 'AU', display: '澳大利亚 - 大堡礁' },
-  { name: '科隆', country: 'PH', display: '菲律宾 - 科隆' },
-  { name: '薄荷岛', country: 'PH', display: '菲律宾 - 薄荷岛' },
-  { name: '巴厘岛', country: 'ID', display: '印尼 - 巴厘岛' },
-  { name: '冲绳', country: 'JP', display: '日本 - 冲绳' },
-  { name: '刁曼岛', country: 'MY', display: '马来西亚 - 刁曼岛' },
-]
-
-const PRESET_TAGS = [
-  '虎鲸',
-  'Manta',
-  '鲸鲨',
-  '海龟',
-  '鲨鱼',
-  '杰克鱼风暴',
-  '沙丁鱼球',
-  '蝠鲼',
-  '海豚',
-  '沉船',
-  '珊瑚',
-  'Mola Mola',
-  '儒艮',
-  '拿破仑鱼',
-  '狮子鱼'
-]
-
-const FLOW_OPTIONS = ['无', '弱', '中', '强']
 
 export default function PostPulse() {
   const { user } = useAuth()
@@ -49,7 +15,7 @@ export default function PostPulse() {
   const [locationInput, setLocationInput] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [visibility, setVisibility] = useState('')
-  const [flow, setFlow] = useState('中')
+  const [flow, setFlow] = useState('None')
   const [temp, setTemp] = useState('')
   const [selectedTags, setSelectedTags] = useState([])
   const [customTag, setCustomTag] = useState('')
@@ -149,7 +115,7 @@ export default function PostPulse() {
         flow,
         temp: temp || 0,
         time: '0m',
-        image: mediaPreview || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=300&fit=crop',
+        image: mediaPreview || null,
         weight: 48,
         geoHash: 'NEW',
         respectCount: 0,
@@ -209,8 +175,8 @@ export default function PostPulse() {
               />
               <div className="upload-placeholder">
                 <span className="upload-icon">+</span>
-                <span className="upload-text font-mono">ADD MEDIA</span>
-                <span className="upload-hint font-mono">4:3 or 1:1</span>
+                <span className="upload-text font-mono">添加照片（可选）</span>
+                <span className="upload-hint font-mono">4:3 或 1:1，支持 JPG/PNG</span>
               </div>
             </label>
           )}
@@ -223,7 +189,7 @@ export default function PostPulse() {
             <input
               type="text"
               className="location-input font-sans"
-              placeholder="Search Species / Location..."
+              placeholder="输入地点..."
               value={locationInput}
               onChange={handleLocationInput}
               onFocus={() => setShowSuggestions(true)}
@@ -261,6 +227,7 @@ export default function PostPulse() {
           <label className="input-label font-mono">环境指标 (可选)</label>
           <div className="stats-grid">
             <div className="stat-input">
+              <span className="stat-letter font-mono">V</span>
               <input
                 type="number"
                 className="stat-field font-mono"
@@ -271,17 +238,11 @@ export default function PostPulse() {
               <span className="stat-unit font-mono">m</span>
             </div>
             <div className="stat-input flow-select">
-              <select
-                className="stat-field font-mono"
-                value={flow}
-                onChange={(e) => setFlow(e.target.value)}
-              >
-                {FLOW_OPTIONS.map(f => (
-                  <option key={f} value={f}>{f}</option>
-                ))}
-              </select>
+              <span className="stat-letter font-mono">水流强度</span>
+              <FlowSelect value={flow} onChange={setFlow} placeholder="水流强度" />
             </div>
             <div className="stat-input">
+              <span className="stat-letter font-mono">T</span>
               <input
                 type="number"
                 className="stat-field font-mono"

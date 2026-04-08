@@ -1,3 +1,43 @@
+.match-create-error {
+  margin: var(--space-sm) var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(255, 80, 80, 0.15);
+  border: 0.5px solid rgba(255, 80, 80, 0.4);
+  border-radius: var(--radius);
+  color: #ff6b6b;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+}
+
+/* Type selector */
+.type-selector {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.type-btn {
+  padding: 6px 12px;
+  background: transparent;
+  border: 0.5px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all var(--transition-instant);
+}
+
+.type-btn:hover {
+  border-color: var(--color-brand);
+}
+
+.type-btn.active {
+  background: rgba(0, 245, 255, 0.15);
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+}
+
 .match-create-page {
   min-height: 100vh;
   background: var(--bg-primary);
@@ -93,9 +133,11 @@
 }
 
 .country-input {
-  flex: 0 0 60px;
+  flex: 0 0 72px;
+  width: 72px;
   text-align: center;
-  text-transform: uppercase;
+  color: var(--color-text-primary);
+  caret-color: var(--color-brand);
 }
 
 /* Time Selection */

@@ -5,11 +5,13 @@ import Login from './pages/Login'
 import PulseFeed from './pages/PulseFeed'
 import PulseDetail from './pages/PulseDetail'
 import MatchHub from './pages/MatchHub'
+import MatchDetail from './pages/MatchDetail'
 import MatchCreate from './pages/MatchCreate'
 import PostPage from './pages/PostPage'
 import Chat from './pages/Chat'
 import TagSearch from './pages/TagSearch'
 import Profile from './pages/Profile'
+import DetailIM from './pages/DetailIM'
 import BottomNav from './components/BottomNav'
 import IntentPicker from './components/IntentPicker'
 import { safeGetItem, safeSetItem, safeRemoveItem } from './utils/safeStorage'
@@ -51,15 +53,25 @@ function App() {
     return () => clearTimeout(timer)
   }, [])
 
-  const login = (email) => {
+  const login = (tokenOrEmail, userData) => {
+    // 真实登录：后端返回 token 和 user
+    if (tokenOrEmail && userData) {
+      const newUser = { ...userData, token: tokenOrEmail }
+      safeSetItem('divepulse_user', newUser)
+      setUser(newUser)
+      return
+    }
+
+    // Demo 登录或旧兼容：仅传入 email
+    const email = tokenOrEmail
     if (!email || typeof email !== 'string') {
       console.error('[login] Invalid email:', email)
       return
     }
-    
+
     const uid = `DP-${Math.floor(1000 + Math.random() * 9000)}`
     const newUser = { uid, email, token: `tok_${Date.now()}` }
-    
+
     safeSetItem('divepulse_user', newUser)
     setUser(newUser)
   }
@@ -85,11 +97,14 @@ function App() {
             <Route path="/" element={<PulseFeed />} />
             <Route path="/pulse/:id" element={<PulseDetail />} />
             <Route path="/match" element={<MatchHub />} />
+            <Route path="/match/:id" element={<MatchDetail />} />
             <Route path="/match/create" element={<MatchCreate />} />
             <Route path="/post" element={<PostPage />} />
             <Route path="/chat" element={<Chat />} />
+            <Route path="/chat/:id" element={<Chat />} />
             <Route path="/tag/:tag" element={<TagSearch />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/detail/:id" element={<DetailIM />} />
           </Routes>
         </main>
         <BottomNav onPostClick={() => setShowIntentPicker(true)} />

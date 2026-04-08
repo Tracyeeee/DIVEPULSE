@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import CommentDrawer from '../components/CommentDrawer'
 import { safeGetItem, safeSetItem } from '../utils/safeStorage'
+import { FLOW_LABELS } from '../utils/constants'
 import './PulseDetail.css'
 
 const INITIAL_PULSE_DATA = {
@@ -286,7 +287,7 @@ export default function PulseDetail() {
         <div className="stat-divider">|</div>
         <div className="stat-item">
           <span className="stat-label">流速</span>
-          <span className="stat-value">{pulse.flow}</span>
+          <span className="stat-value">{FLOW_LABELS[pulse.flow] || pulse.flow}</span>
         </div>
         <div className="stat-divider">|</div>
         <div className="stat-item">

@@ -83,3 +83,35 @@
 .btn-ghost {
   margin-top: var(--space-sm);
 }
+
+.debug-code {
+  background: rgba(0, 245, 255, 0.08);
+  border: 1px solid rgba(0, 245, 255, 0.3);
+  border-radius: var(--radius);
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-brand);
+  text-align: center;
+  letter-spacing: 6px;
+  user-select: all;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error {
+  background: rgba(255, 80, 80, 0.1);
+  border: 0.5px solid rgba(255, 80, 80, 0.4);
+  border-radius: var(--radius);
+  padding: var(--space-sm) var(--space-md);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: #FF5050;
+  text-align: center;
+  letter-spacing: 1px;
+}

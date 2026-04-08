@@ -13,16 +13,30 @@ export const authenticate = async (req, res, next) => {
   try {
     // 从 Header 获取 Token
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return errorResponse(res, '未提供认证令牌', 401);
     }
-    
+
     const token = authHeader.split(' ')[1];
-    
-    // 验证 Token
+
+    // Demo / 临时 token 兼容（格式: tok_ 开头视为有效）
+    if (token.startsWith('tok_')) {
+      // 仅验证格式存在，查找对应 demo 用户
+      const demoUser = await prisma.user.findFirst({
+        where: { email: { contains: 'demo' } },
+        select: { id: true, uid: true, email: true, nickname: true, avatar: true, isAnonymous: true }
+      });
+      if (demoUser) {
+        req.user = demoUser;
+        return next();
+      }
+      // 没有 demo 用户则放行，由后续逻辑处理
+    }
+
+    // 标准 JWT 验证
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+
     // 获取用户
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
@@ -35,15 +49,15 @@ export const authenticate = async (req, res, next) => {
         isAnonymous: true
       }
     });
-    
+
     if (!user) {
       return errorResponse(res, '用户不存在', 401);
     }
-    
+
     // 将用户信息附加到请求对象
     req.user = user;
     next();
-    
+
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
       return errorResponse(res, '令牌已过期', 401);

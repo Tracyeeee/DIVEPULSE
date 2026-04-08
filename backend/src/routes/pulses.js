@@ -51,7 +51,7 @@ router.post(
     body('visibility').optional().isInt({ min: 1 }),
     body('flow').optional().isIn(['None', 'Light', 'Moderate', 'Strong']),
     body('temp').isFloat({ min: -10, max: 40 }).withMessage('水温范围 -10°C ~ 40°C'),
-    body('image').notEmpty().withMessage('请上传潜点照片'),
+    body('image').optional(),
     body('tags').optional().isArray(),
     validate
   ],

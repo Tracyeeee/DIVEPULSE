@@ -13,6 +13,19 @@ async function main() {
   // 创建测试用户
   const hashedPassword = await bcrypt.hash('password123', 12);
   
+  const demoUser = await prisma.user.upsert({
+    where: { email: 'demo@divepulse.com' },
+    update: {},
+    create: {
+      uid: 'DP-DEMO',
+      email: 'demo@divepulse.com',
+      password: hashedPassword,
+      nickname: 'Demo Diver',
+      bio: 'Explore DivePulse in demo mode',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=demo'
+    }
+  });
+
   const users = await Promise.all([
     prisma.user.upsert({
       where: { email: 'alice@divepulse.com' },
@@ -52,7 +65,7 @@ async function main() {
     })
   ]);
 
-  console.log(`✅ 创建了 ${users.length} 个用户`);
+  console.log(`✅ 创建了 ${users.length + 1} 个用户`);
 
   // 创建标签
   const tagNames = ['蝠鲼', '珊瑚', '海龟', 'Mola Mola', '鲨鱼', '水母湖', '沉船', '微距', '大货', '夜潜'];
@@ -173,10 +186,13 @@ async function main() {
   console.log(`✅ 创建了 ${pulseData.length} 条脉搏数据`);
 
   // 创建拼潜
-  await prisma.match.create({
-    data: {
+  await prisma.match.upsert({
+    where: { id: 'seed-match-1' },
+    update: {},
+    create: {
+      id: 'seed-match-1',
       userId: users[0].id,
-      type: 'DIVE',
+      type: 'BOAT',
       title: '周末自由潜训练',
       description: '寻找潜伴一起练习法兰佐',
       location: '菲律宾薄荷岛',
@@ -186,10 +202,13 @@ async function main() {
     }
   });
 
-  await prisma.match.create({
-    data: {
+  await prisma.match.upsert({
+    where: { id: 'seed-match-2' },
+    update: {},
+    create: {
+      id: 'seed-match-2',
       userId: users[1].id,
-      type: 'TRIP',
+      type: 'TEAM',
       title: '马尔代夫船宿行程',
       description: '7天6晚追寻鲸鲨',
       location: '马尔代夫马累',

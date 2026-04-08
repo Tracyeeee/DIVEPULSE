@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { safeGetItem, safeSetItem } from '../utils/safeStorage'
 import './Chat.css'
 
@@ -22,21 +22,7 @@ const SYSTEM_NOTIFICATIONS = [
   }
 ]
 
-export default function Chat() {
-  const [conversations, setConversations] = useState([])
-  const [notifications, setNotifications] = useState([])
-  const [activeTab, setActiveTab] = useState('chats')
-  const navigate = useNavigate()
-
-  useEffect(() => {
-    const savedConversations = safeGetItem('divepulse_conversations', [])
-    if (Array.isArray(savedConversations)) {
-      setConversations(savedConversations)
-    }
-
-    setNotifications(SYSTEM_NOTIFICATIONS)
-  }, [])
-
+function ChatList({ conversations, notifications, activeTab, onTabChange, onConvClick }) {
   const formatTime = (time) => {
     try {
       const date = new Date()
@@ -50,36 +36,23 @@ export default function Chat() {
     }
   }
 
-  const handleConversationClick = (conv) => {
-    if (conv && conv.id) {
-      navigate(`/chat/${conv.id}`)
-    }
-  }
-
   return (
-    <div className="chat-page">
-      {/* Header */}
-      <div className="chat-header">
-        <span className="chat-title font-mono">MESSAGES</span>
-      </div>
-
-      {/* Tabs */}
+    <>
       <div className="chat-tabs">
-        <button 
+        <button
           className={`chat-tab ${activeTab === 'chats' ? 'active' : ''}`}
-          onClick={() => setActiveTab('chats')}
+          onClick={() => onTabChange('chats')}
         >
           CHATS
         </button>
-        <button 
+        <button
           className={`chat-tab ${activeTab === 'system' ? 'active' : ''}`}
-          onClick={() => setActiveTab('system')}
+          onClick={() => onTabChange('system')}
         >
           SYSTEM
         </button>
       </div>
 
-      {/* Content */}
       <div className="chat-list">
         {activeTab === 'chats' ? (
           conversations.length === 0 ? (
@@ -92,10 +65,10 @@ export default function Chat() {
             </div>
           ) : (
             conversations.map(conv => (
-              <div 
+              <div
                 key={conv?.id || Date.now()}
                 className="chat-item"
-                onClick={() => handleConversationClick(conv)}
+                onClick={() => onConvClick(conv)}
               >
                 <div className="chat-avatar">
                   {conv?.uid ? conv.uid.slice(-4) : '????'}
@@ -113,7 +86,7 @@ export default function Chat() {
           )
         ) : (
           notifications.map(notif => (
-            <div 
+            <div
               key={notif?.id || Date.now()}
               className={`chat-item ${notif?.type || 'system'} ${notif?.read ? 'read' : ''}`}
             >
@@ -129,6 +102,180 @@ export default function Chat() {
           ))
         )}
       </div>
+    </>
+  )
+}
+
+function ChatDetail({ convId, conversations, onBack }) {
+  const [messages, setMessages] = useState([])
+  const [inputText, setInputText] = useState('')
+  const messagesEndRef = useRef(null)
+
+  useEffect(() => {
+    const allConvs = safeGetItem('divepulse_conversations', [])
+    const conv = allConvs.find(c => c.id === convId)
+    if (conv) {
+      setMessages(conv.messages || [])
+      if (!conv.read) {
+        const updated = allConvs.map(c =>
+          c.id === convId ? { ...c, read: true } : c
+        )
+        safeSetItem('divepulse_conversations', updated)
+      }
+    }
+  }, [convId])
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView()
+  }, [messages])
+
+  const handleSend = () => {
+    if (!inputText.trim()) return
+    const newMsg = {
+      id: Date.now(),
+      sender: 'me',
+      text: inputText.trim(),
+      time: new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    }
+    const allConvs = safeGetItem('divepulse_conversations', [])
+    const updated = allConvs.map(c => {
+      if (c.id === convId) {
+        return {
+          ...c,
+          messages: [...(c.messages || []), newMsg],
+          lastMessage: newMsg.text,
+          lastTime: newMsg.time
+        }
+      }
+      return c
+    })
+    safeSetItem('divepulse_conversations', updated)
+    setMessages(prev => [...prev, newMsg])
+    setInputText('')
+  }
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
+  }
+
+  const conv = safeGetItem('divepulse_conversations', []).find(c => c.id === convId)
+
+  return (
+    <div className="chat-detail">
+      <div className="chat-detail-header">
+        <button className="back-btn" onClick={onBack}>← 返回</button>
+        <span className="chat-detail-title font-mono">{conv?.uid || '???'}</span>
+      </div>
+
+      <div className="chat-detail-messages">
+        {messages.length === 0 ? (
+          <div className="chat-detail-empty font-mono">开始对话吧</div>
+        ) : (
+          messages.map((msg, idx) => (
+            <div
+              key={msg?.id || idx}
+              className={`message ${msg?.sender === 'me' ? 'message-me' : 'message-other'}`}
+            >
+              <div
+                className="message-bubble"
+                style={msg?.sender === 'me'
+                  ? { background: '#00F5FF', color: '#000000' }
+                  : { background: 'rgba(255,255,255,0.06)', border: '0.5px solid #333333', color: '#FFFFFF' }
+                }
+              >
+                <span className="message-text">{msg?.text || ''}</span>
+                <span className="message-time font-mono">{msg?.time || '??:??'}</span>
+              </div>
+            </div>
+          ))
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="chat-detail-input">
+        <input
+          type="text"
+          className="chat-input font-mono"
+          placeholder="输入消息..."
+          value={inputText}
+          onChange={e => setInputText(e.target.value)}
+          onKeyPress={handleKeyPress}
+        />
+        <button className="send-btn font-mono" onClick={handleSend}>
+          发送
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export default function Chat() {
+  const { id: convId } = useParams()
+  const navigate = useNavigate()
+  const [conversations, setConversations] = useState([])
+  const [notifications] = useState(SYSTEM_NOTIFICATIONS)
+  const [activeTab, setActiveTab] = useState('chats')
+
+  const loadConversations = () => {
+    const saved = safeGetItem('divepulse_conversations', [])
+    if (Array.isArray(saved)) {
+      setConversations(saved)
+    }
+  }
+
+  useEffect(() => {
+    loadConversations()
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadConversations()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('divepulse_conversations_updated', loadConversations)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('divepulse_conversations_updated', loadConversations)
+    }
+  }, [])
+
+  const handleConvClick = (conv) => {
+    if (conv && conv.id) {
+      navigate(`/chat/${conv.id}`)
+    }
+  }
+
+  const handleBack = () => {
+    navigate('/chat')
+  }
+
+  if (convId) {
+    return (
+      <div className="chat-page">
+        <ChatDetail
+          convId={convId}
+          conversations={conversations}
+          onBack={handleBack}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className="chat-page">
+      <div className="chat-header">
+        <span className="chat-title font-mono">MESSAGES</span>
+      </div>
+
+      <ChatList
+        conversations={conversations}
+        notifications={notifications}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onConvClick={handleConvClick}
+      />
     </div>
   )
 }
