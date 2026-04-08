@@ -1,15 +1,18 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#000000" />
+    <meta name="format-detection" content="telephone=no" />
     <meta name="description" content="DivePulse - 全球潜水员专业水下情报与拼行协作工具" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- 不使用 Google Fonts：国内/微信内置浏览器易长时间阻塞，导致白屏与进度条卡住 -->
     <title>DivePulse 潜脉</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #000; color: #fff; }
+      #root { min-height: 100%; min-height: 100dvh; }
+    </style>
   </head>
   <body>
     <div id="root"></div>
