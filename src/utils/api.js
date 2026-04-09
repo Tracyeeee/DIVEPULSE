@@ -44,6 +44,20 @@ function authHeaders(token) {
 }
 
 export const authApi = {
+  // 用户名密码注册
+  registerByUsername: (username, password, confirmPassword) =>
+    request('/api/auth/register/username', {
+      method: 'POST',
+      body: JSON.stringify({ username, password, confirmPassword }),
+    }),
+
+  // 用户名密码登录
+  loginByUsername: (username, password) =>
+    request('/api/auth/login/username', {
+      method: 'POST',
+      body: JSON.stringify({ username, password }),
+    }),
+
   sendOtp: (email) =>
     request('/api/auth/otp/send', {
       method: 'POST',

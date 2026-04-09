@@ -3,7 +3,7 @@
  */
 
 import jwt from 'jsonwebtoken';
-import { prisma } from '../app.js';
+import { prisma } from '../utils/prisma.js';
 import { errorResponse } from '../utils/response.js';
 
 /**

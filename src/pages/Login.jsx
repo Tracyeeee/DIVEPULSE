@@ -4,81 +4,86 @@ import { authApi } from '../utils/api'
 import './Login.css'
 
 export default function Login({ onLogin }) {
-  const [email, setEmail] = useState('')
-  const [code, setCode] = useState('')
-  const [step, setStep] = useState(1)
+  const [mode, setMode] = useState('login')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [debugCode, setDebugCode] = useState('')
   const navigate = useNavigate()
 
-  const handleEmailSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
     setError('')
-    setDebugCode('')
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!email || !emailRegex.test(email)) {
-      setError('请输入有效的邮箱地址')
+    if (!username || !password) {
+      setError('请填写用户名和密码')
       return
     }
 
     setLoading(true)
     try {
-      const res = await authApi.sendOtp(email)
-      setStep(2)
-      if (res.data?._debug) {
-        setDebugCode(res.data._debug)
-      }
-    } catch (err) {
-      setError(err.message || '发送失败，请重试')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleCodeSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-
-    if (code.length !== 6) {
-      setError('INVALID_CODE')
-      return
-    }
-
-    setLoading(true)
-    try {
-      const res = await authApi.loginWithOtp(email, code)
+      const res = await authApi.loginByUsername(username, password)
       onLogin(res.data.token, res.data.user)
       navigate('/')
     } catch (err) {
-      setError(err.message || '验证码错误')
+      setError(err.message || '登录失败，请检查用户名和密码')
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleRegister = async (e) => {
+    e.preventDefault()
+    setError('')
+
+    if (!username) {
+      setError('请输入用户名')
+      return
+    }
+    if (username.length < 3 || username.length > 20) {
+      setError('用户名需3-20个字符')
+      return
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      setError('用户名只能包含字母、数字和下划线')
+      return
+    }
+    if (!password) {
+      setError('请设置密码')
+      return
+    }
+    if (password.length < 6) {
+      setError('密码至少6位')
+      return
+    }
+    if (password !== confirmPassword) {
+      setError('两次密码不匹配')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const res = await authApi.registerByUsername(username, password, confirmPassword)
+      onLogin(res.data.token, res.data.user)
+      navigate('/')
+    } catch (err) {
+      setError(err.message || '注册失败，请重试')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSwitchMode = () => {
+    setMode(mode === 'login' ? 'register' : 'login')
+    setError('')
+    setPassword('')
+    setConfirmPassword('')
   }
 
   const handleDemoLogin = () => {
-    // 使用特殊的 demo token，后端 auth 中间件会识别并返回 demo 用户
-    onLogin('tok_demo', { email: 'demo@divepulse.com', uid: 'DP-DEMO' })
+    onLogin('tok_demo', { uid: 'DP-DEMO', nickname: 'Demo User', username: 'demo' })
     navigate('/')
-  }
-
-  const handleResend = async () => {
-    setCode('')
-    setError('')
-    setDebugCode('')
-    setLoading(true)
-    try {
-      const res = await authApi.sendOtp(email)
-      if (res.data?._debug) {
-        setDebugCode(res.data._debug)
-      }
-    } catch (err) {
-      setError(err.message || '发送失败，请重试')
-    } finally {
-      setLoading(false)
-    }
   }
 
   return (
@@ -91,59 +96,81 @@ export default function Login({ onLogin }) {
         </div>
 
         <div className="login-content">
-          {step === 1 ? (
-            <form onSubmit={handleEmailSubmit} className="login-form">
-              <div className="input-group">
-                <input
-                  type="email"
-                  className="input-field"
-                  placeholder="EMAIL"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
-                  autoFocus
-                />
-              </div>
-              {error && <div className="error">{error}</div>}
-              <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
-                {loading ? 'SENDING...' : 'ACCESS'}
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleCodeSubmit} className="login-form">
-              <p className="login-hint">SENT_TO {email}</p>
-              {debugCode && (
-                <div className="debug-code">
-                  DEV: {debugCode}
-                </div>
-              )}
+          {mode === 'login' ? (
+            <form onSubmit={handleLogin} className="login-form">
               <div className="input-group">
                 <input
                   type="text"
-                  className="input-field code-input"
-                  placeholder="000000"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  maxLength={6}
+                  className="input-field"
+                  placeholder="用户名"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   disabled={loading}
                   autoFocus
                 />
               </div>
+              <div className="input-group">
+                <input
+                  type="password"
+                  className="input-field"
+                  placeholder="密码"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
               {error && <div className="error">{error}</div>}
               <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
-                {loading ? 'VERIFYING...' : 'VERIFY'}
+                {loading ? '登录中...' : '登录'}
               </button>
-              <button type="button" className="btn btn-ghost" onClick={handleResend} disabled={loading}>
-                RESEND
+            </form>
+          ) : (
+            <form onSubmit={handleRegister} className="login-form">
+              <div className="input-group">
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="用户名（3-20字符，字母/数字/下划线）"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  disabled={loading}
+                  autoFocus
+                />
+              </div>
+              <div className="input-group">
+                <input
+                  type="password"
+                  className="input-field"
+                  placeholder="设置密码（至少6位）"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+              <div className="input-group">
+                <input
+                  type="password"
+                  className="input-field"
+                  placeholder="确认密码"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+              {error && <div className="error">{error}</div>}
+              <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+                {loading ? '注册中...' : '注册'}
               </button>
             </form>
           )}
         </div>
 
         <div className="login-footer">
-          <p className="login-terms">
-            BY CONTINUING, YOU AGREE TO<br />
-            TERMS OF SERVICE
+          <p className="login-switch">
+            {mode === 'login' ? '还没有账号？' : '已有账号？'}
+            <button type="button" className="link-btn" onClick={handleSwitchMode}>
+              {mode === 'login' ? '立即注册' : '去登录'}
+            </button>
           </p>
           <button className="btn btn-outline demo-btn" onClick={handleDemoLogin}>
             访客登录

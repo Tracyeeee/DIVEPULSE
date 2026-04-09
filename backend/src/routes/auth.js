@@ -11,6 +11,50 @@ import * as authController from '../controllers/authController.js';
 const router = Router();
 
 /**
+ * @route   POST /api/auth/register/username
+ * @desc    用户名密码注册
+ * @access  Public
+ */
+router.post(
+  '/register/username',
+  [
+    body('username')
+      .trim()
+      .isLength({ min: 3, max: 20 })
+      .withMessage('用户名需3-20个字符')
+      .matches(/^[a-zA-Z0-9_]+$/)
+      .withMessage('用户名只能包含字母、数字和下划线'),
+    body('password')
+      .isLength({ min: 6 })
+      .withMessage('密码至少6位'),
+    body('confirmPassword')
+      .custom((value, { req }) => {
+        if (value !== req.body.password) {
+          throw new Error('两次密码不匹配');
+        }
+        return true;
+      }),
+    validate,
+  ],
+  authController.registerByUsername
+);
+
+/**
+ * @route   POST /api/auth/login/username
+ * @desc    用户名密码登录
+ * @access  Public
+ */
+router.post(
+  '/login/username',
+  [
+    body('username').trim().notEmpty().withMessage('请输入用户名'),
+    body('password').notEmpty().withMessage('请输入密码'),
+    validate,
+  ],
+  authController.loginByUsername
+);
+
+/**
  * @route   POST /api/auth/register
  * @desc    用户注册
  * @access  Public

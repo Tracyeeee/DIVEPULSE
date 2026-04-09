@@ -4,7 +4,7 @@
 
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { prisma } from '../app.js';
+import { prisma } from '../utils/prisma.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 
 // 生成 JWT Token
@@ -157,6 +157,84 @@ export const loginWithOtp = async (req, res, next) => {
         isAnonymous: user.isAnonymous
       },
       token
+    }, '登录成功');
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * 用户名密码注册
+ * POST /api/auth/register/username
+ */
+export const registerByUsername = async (req, res, next) => {
+  try {
+    const { username, password, confirmPassword } = req.body;
+
+    if (password !== confirmPassword) {
+      return errorResponse(res, '两次密码不匹配', 400);
+    }
+
+    const existing = await prisma.user.findUnique({ where: { username } });
+    if (existing) {
+      return errorResponse(res, '该用户名已被占用', 409);
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const user = await prisma.user.create({
+      data: {
+        username,
+        password: hashedPassword,
+        nickname: username,
+        uid: await generateUid(),
+      },
+      select: {
+        id: true,
+        uid: true,
+        username: true,
+        nickname: true,
+        avatar: true,
+        isAnonymous: true,
+      },
+    });
+
+    const token = generateToken(user.id);
+    return successResponse(res, { user, token }, '注册成功', 201);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * 用户名密码登录
+ * POST /api/auth/login/username
+ */
+export const loginByUsername = async (req, res, next) => {
+  try {
+    const { username, password } = req.body;
+
+    const user = await prisma.user.findUnique({ where: { username } });
+    if (!user) {
+      return errorResponse(res, '用户名或密码错误', 401);
+    }
+
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return errorResponse(res, '用户名或密码错误', 401);
+    }
+
+    const token = generateToken(user.id);
+    return successResponse(res, {
+      user: {
+        id: user.id,
+        uid: user.uid,
+        username: user.username,
+        nickname: user.nickname,
+        avatar: user.avatar,
+        isAnonymous: user.isAnonymous,
+      },
+      token,
     }, '登录成功');
   } catch (error) {
     next(error);

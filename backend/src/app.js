@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from './utils/prisma.js';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 
@@ -21,9 +21,6 @@ import { notFoundHandler } from './middleware/notFoundHandler.js';
 
 // 加载环境变量
 dotenv.config();
-
-// 初始化 Prisma
-export const prisma = new PrismaClient();
 
 // 创建 Express 应用
 const app = express();

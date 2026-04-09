@@ -80,6 +80,27 @@
   padding: var(--space-sm) var(--space-md);
 }
 
+.login-switch {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--color-brand);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 4px;
+  font-family: inherit;
+}
+
+.link-btn:hover {
+  color: var(--color-text-primary);
+}
+
 .btn-ghost {
   margin-top: var(--space-sm);
 }
