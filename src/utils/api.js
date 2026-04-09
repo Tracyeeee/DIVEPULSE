@@ -46,26 +46,26 @@ function authHeaders(token) {
 export const authApi = {
   // 用户名密码注册
   registerByUsername: (username, password, confirmPassword) =>
-    request('/api/auth/register/username', {
+    request('/auth/register/username', {
       method: 'POST',
       body: JSON.stringify({ username, password, confirmPassword }),
     }),
 
   // 用户名密码登录
   loginByUsername: (username, password) =>
-    request('/api/auth/login/username', {
+    request('/auth/login/username', {
       method: 'POST',
       body: JSON.stringify({ username, password }),
     }),
 
   sendOtp: (email) =>
-    request('/api/auth/otp/send', {
+    request('/auth/otp/send', {
       method: 'POST',
       body: JSON.stringify({ email }),
     }),
 
   loginWithOtp: (email, code) =>
-    request('/api/auth/otp/login', {
+    request('/auth/otp/login', {
       method: 'POST',
       body: JSON.stringify({ email, code }),
     }),
@@ -73,46 +73,46 @@ export const authApi = {
 
 export const matchApi = {
   getMatches: (params = {}, token) =>
-    request('/api/matches' + (Object.keys(params).length ? '?' + new URLSearchParams(params).toString() : ''), {
+    request('/matches' + (Object.keys(params).length ? '?' + new URLSearchParams(params).toString() : ''), {
       headers: authHeaders(token)
     }),
 
   getMatchById: (id, token) =>
-    request(`/api/matches/${id}`, { headers: authHeaders(token) }),
+    request(`/matches/${id}`, { headers: authHeaders(token) }),
 
   createMatch: (data, token) =>
-    request('/api/matches', {
+    request('/matches', {
       method: 'POST',
       body: JSON.stringify(data),
       headers: authHeaders(token)
     }),
 
   joinMatch: (id, token) =>
-    request(`/api/matches/${id}/join`, {
+    request(`/matches/${id}/join`, {
       method: 'POST',
       headers: authHeaders(token)
     }),
 
   leaveMatch: (id, token) =>
-    request(`/api/matches/${id}/leave`, {
+    request(`/matches/${id}/leave`, {
       method: 'POST',
       headers: authHeaders(token)
     }),
 
   getMyCreated: (token) =>
-    request('/api/matches/my/created', { headers: authHeaders(token) }),
+    request('/matches/my/created', { headers: authHeaders(token) }),
 
   getMyParticipating: (token) =>
-    request('/api/matches/my/participating', { headers: authHeaders(token) }),
+    request('/matches/my/participating', { headers: authHeaders(token) }),
 
   approveParticipant: (matchId, participantId, token) =>
-    request(`/api/matches/${matchId}/approve/${participantId}`, {
+    request(`/matches/${matchId}/approve/${participantId}`, {
       method: 'POST',
       headers: authHeaders(token)
     }),
 
   rejectParticipant: (matchId, participantId, token) =>
-    request(`/api/matches/${matchId}/reject/${participantId}`, {
+    request(`/matches/${matchId}/reject/${participantId}`, {
       method: 'POST',
       headers: authHeaders(token)
     }),

@@ -2,7 +2,7 @@
  * 用户控制器
  */
 
-import { prisma } from '../app.js';
+import { prisma } from '../utils/prisma.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 
 /**

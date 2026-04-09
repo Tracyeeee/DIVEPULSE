@@ -3,7 +3,7 @@
  * 支持前端格式: dateRange, total, note
  */
 
-import { prisma } from '../app.js';
+import { prisma } from '../utils/prisma.js';
 import { successResponse, errorResponse, paginatedResponse } from '../utils/response.js';
 
 /**

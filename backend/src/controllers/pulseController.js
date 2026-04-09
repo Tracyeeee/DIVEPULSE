@@ -3,7 +3,7 @@
  * 适配前端数据结构，包含 time, isAnonymous, isRespected 等字段
  */
 
-import { prisma } from '../app.js';
+import { prisma } from '../utils/prisma.js';
 import { successResponse, errorResponse, paginatedResponse } from '../utils/response.js';
 
 // 时间范围转换为毫秒
