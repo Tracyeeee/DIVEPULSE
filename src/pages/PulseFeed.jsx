@@ -5,143 +5,12 @@ import { safeGetItem, safeSetItem } from '../utils/safeStorage'
 import { FLOW_LABELS } from '../utils/constants'
 import './PulseFeed.css'
 
-const INITIAL_PULSE_DATA = [
-  {
-    id: 1,
-    location: '菲律宾 - 长滩岛',
-    country: 'PH',
-    visibility: 25,
-    flow: 'Moderate',
-    temp: 28,
-    time: '2h',
-    image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=300&fit=crop',
-    weight: 48,
-    geoHash: 'PH.BH',
-    respectCount: 42,
-    uid: 'DP-7729',
-    isAnonymous: false,
-    tags: ['海龟', '珊瑚']
-  },
-  {
-    id: 2,
-    location: '泰国 - 斯米兰',
-    country: 'TH',
-    visibility: 30,
-    flow: 'Strong',
-    temp: 29,
-    time: '4h',
-    image: 'https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=400&h=300&fit=crop',
-    weight: 47,
-    geoHash: 'TH.SM',
-    respectCount: 28,
-    uid: 'DP-3341',
-    isAnonymous: false,
-    tags: ['Manta', '鲨鱼']
-  },
-  {
-    id: 3,
-    location: '印尼 - 四王群岛',
-    country: 'ID',
-    visibility: 40,
-    flow: 'Light',
-    temp: 27,
-    time: '6h',
-    image: 'https://images.unsplash.com/photo-1559825481-12a05cc00344?w=400&h=300&fit=crop',
-    weight: 46,
-    geoHash: 'ID.R4',
-    respectCount: 15,
-    uid: 'DP-5567',
-    isAnonymous: true,
-    tags: ['杰克鱼风暴']
-  },
-  {
-    id: 4,
-    location: '马来西亚 - 仙本那',
-    country: 'MY',
-    visibility: 20,
-    flow: 'Strong',
-    temp: 30,
-    time: '8h',
-    image: 'https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?w=400&h=300&fit=crop',
-    weight: 45,
-    geoHash: 'MY.SB',
-    respectCount: 36,
-    uid: 'DP-8892',
-    isAnonymous: false,
-    tags: ['海龟', '沉船']
-  },
-  {
-    id: 5,
-    location: '马尔代夫',
-    country: 'MV',
-    visibility: 35,
-    flow: 'Moderate',
-    temp: 28,
-    time: '12h',
-    image: 'https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=400&h=300&fit=crop',
-    weight: 44,
-    geoHash: 'MV.AT',
-    respectCount: 89,
-    uid: 'DP-2214',
-    isAnonymous: false,
-    tags: ['Manta', '鲸鲨']
-  },
-  {
-    id: 6,
-    location: '埃及 - 红海',
-    country: 'EG',
-    visibility: 28,
-    flow: 'Strong',
-    temp: 26,
-    time: '18h',
-    image: 'https://images.unsplash.com/photo-1551244072-5d12893278ab?w=400&h=300&fit=crop',
-    weight: 43,
-    geoHash: 'EG.RS',
-    respectCount: 12,
-    uid: 'DP-4455',
-    isAnonymous: true,
-    tags: ['蝠鲼', '珊瑚']
-  },
-  {
-    id: 7,
-    location: '澳大利亚 - 大堡礁',
-    country: 'AU',
-    visibility: 22,
-    flow: 'Light',
-    temp: 25,
-    time: '24h',
-    image: 'https://images.unsplash.com/photo-1587139223877-04cb899fa3e8?w=400&h=300&fit=crop',
-    weight: 42,
-    geoHash: 'AU.GB',
-    respectCount: 7,
-    uid: 'DP-6678',
-    isAnonymous: false,
-    tags: ['Mola Mola', '海龟']
-  },
-  {
-    id: 8,
-    location: '帕劳',
-    country: 'PW',
-    visibility: 45,
-    flow: 'Moderate',
-    temp: 29,
-    time: '36h',
-    image: 'https://images.unsplash.com/photo-1519451241324-20b4ea2c4220?w=400&h=300&fit=crop',
-    weight: 40,
-    geoHash: 'PW.PL',
-    respectCount: 23,
-    uid: 'DP-9901',
-    isAnonymous: false,
-    tags: ['水母湖', '鲨鱼']
-  }
-]
-
 export default function PulseFeed() {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState('Most Liked')
   const [timeRange, setTimeRange] = useState('All Time')
   const [showFilter, setShowFilter] = useState(false)
-  const [data, setData] = useState(INITIAL_PULSE_DATA)
+  const [data, setData] = useState([])
   const [loading, setLoading] = useState(false)
   const [respectedIds, setRespectedIds] = useState(() => safeGetItem('divepulse_respects', []))
   const [activeCommentPulse, setActiveCommentPulse] = useState(null)
@@ -165,12 +34,6 @@ export default function PulseFeed() {
   // 加载评论数
   useEffect(() => {
     const counts = {}
-    
-    // 从初始数据加载
-    INITIAL_PULSE_DATA.forEach(pulse => {
-      const saved = safeGetItem(`divepulse_comments_${pulse.id}`, null)
-      counts[pulse.id] = Array.isArray(saved) ? saved.length : 0
-    })
     
     // 从用户发布的数据加载
     const savedPulses = safeGetItem('divepulse_new_pulses', [])
@@ -197,13 +60,9 @@ export default function PulseFeed() {
   useEffect(() => {
     setLoading(true)
     const timer = setTimeout(() => {
-      let filtered = [...INITIAL_PULSE_DATA]
-
-      // 安全获取用户发布的脉搏
+      // 只加载用户发布的脉搏
       const userPulses = safeGetItem('divepulse_new_pulses', [])
-      if (Array.isArray(userPulses) && userPulses.length > 0) {
-        filtered = [...userPulses, ...filtered]
-      }
+      let filtered = Array.isArray(userPulses) ? [...userPulses] : []
 
       // 搜索过滤
       if (search.trim()) {

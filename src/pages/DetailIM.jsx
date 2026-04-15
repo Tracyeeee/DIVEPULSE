@@ -4,59 +4,6 @@ import { useAuth } from '../App'
 import { safeGetItem, safeSetItem } from '../utils/safeStorage'
 import './DetailIM.css'
 
-const SAMPLE_DETAIL = {
-  1: {
-    id: 1,
-    type: 'BOAT',
-    location: '菲律宾 - 长滩岛',
-    date: '2026.04.05',
-    current: 2,
-    total: 6,
-    uid: 'DP-7729',
-    note: '晨潜，寻找潜伴。计划早上6点出发，3次潜水。有兴趣的朋友请联系我。'
-  },
-  2: {
-    id: 2,
-    type: 'CAR',
-    location: '泰国 - 普吉',
-    date: '2026.04.08',
-    current: 1,
-    total: 4,
-    uid: 'DP-3341',
-    note: '需要拼车从机场到酒店，预计下午2点到达。'
-  },
-  3: {
-    id: 3,
-    type: 'ROOM',
-    location: '印尼 - 巴厘岛',
-    date: '2026.04.12',
-    current: 0,
-    total: 2,
-    uid: 'DP-5567',
-    note: '寻找潜水行程的潜伴一起平摊住宿费。'
-  },
-  4: {
-    id: 4,
-    type: 'TEAM',
-    location: '马来西亚 - 仙本那',
-    date: '2026.04.15',
-    current: 3,
-    total: 4,
-    uid: 'DP-8892',
-    note: 'Fun Dive组队，目前3人，还差1人。'
-  },
-  5: {
-    id: 5,
-    type: 'BOAT',
-    location: '马尔代夫',
-    date: '2026.04.20',
-    current: 4,
-    total: 8,
-    uid: 'DP-2214',
-    note: '船宿行程，7天6夜。还差4人。'
-  }
-}
-
 const MATCH_TYPES = {
   'BOAT': '拼船',
   'CAR': '拼车',
@@ -81,8 +28,8 @@ export default function DetailIM() {
   const [inputText, setInputText] = useState('')
   const messagesEndRef = useRef(null)
 
-  // 安全获取详情数据
-  const detail = SAMPLE_DETAIL[id] || SAMPLE_DETAIL[1] || {}
+  // 安全获取详情数据（若无数据则显示空白）
+  const detail = {}
 
   useEffect(() => {
     if (view === 'im' && connected) {

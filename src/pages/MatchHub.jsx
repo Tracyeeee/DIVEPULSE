@@ -11,61 +11,10 @@ const MATCH_TYPES = {
   'TEAM': '组队'
 }
 
-const SAMPLE_MATCH_DATA = [
-  {
-    id: 'sample-1',
-    type: 'BOAT',
-    location: '菲律宾 - 长滩岛',
-    dateRange: { start: '2026.04.05', end: null },
-    current: 2,
-    total: 6,
-    status: 'open',
-    uid: 'DP-7729',
-    note: '晨潜，寻找潜伴'
-  },
-  {
-    id: 'sample-2',
-    type: 'CAR',
-    location: '泰国 - 普吉',
-    dateRange: { start: '2026.04.08', end: '2026.04.10' },
-    current: 1,
-    total: 4,
-    status: 'open',
-    uid: 'DP-3341',
-    note: '机场接送'
-  },
-  {
-    id: 'sample-3',
-    type: 'ROOM',
-    location: '印尼 - 巴厘岛',
-    dateRange: { start: '2026.04.12', end: '2026.04.18' },
-    current: 0,
-    total: 2,
-    status: 'open',
-    uid: 'DP-5567',
-    note: '平摊住宿费'
-  },
-  {
-    id: 'sample-4',
-    type: 'TEAM',
-    location: '马来西亚 - 仙本那',
-    dateRange: { start: '2026.04.15', end: null },
-    current: 3,
-    total: 4,
-    status: 'open',
-    uid: 'DP-8892',
-    note: 'Fun Dive组队'
-  }
-]
-
 function formatDateRange(range) {
   if (!range) return ''
   if (range.end) return `${range.start} - ${range.end}`
   return range.start
-}
-
-function getToday() {
-  return new Date().toISOString().split('T')[0]
 }
 
 /**
@@ -148,36 +97,30 @@ export default function MatchHub() {
     setJoinError('')
     try {
       const res = await matchApi.getMatches({ status: 'OPEN' }, token)
-      // 后端返回 { success, data: [...] } 或 { success, data: { items: [...] } }
       let items = res.data?.items ?? res.data ?? []
-      setJoinList(items.length > 0 ? items : SAMPLE_MATCH_DATA)
+      setJoinList(items)
     } catch {
-      setJoinList(SAMPLE_MATCH_DATA)
+      setJoinList([])
     } finally {
       setJoinLoading(false)
     }
   }, [token])
 
-  // 加载"我发起的"列表（含申请人）
+  // 加载"我发起的"列表
   const loadMyCreated = useCallback(async () => {
     if (!user) return
     setMyLoading(true)
     try {
       const res = await matchApi.getMyCreated(token)
-      console.log('[MatchHub] getMyCreated 响应:', res)
-      // 支持后端两种返回格式
       const data = Array.isArray(res.data) ? res.data : res.data?.items ?? []
       setMyCreatedMatches(data)
     } catch (err) {
-      console.error('[MatchHub] getMyCreated 失败:', err)
-      // 静默失败，不弹 alert 阻塞 UI
       setMyCreatedMatches([])
     } finally {
       setMyLoading(false)
     }
   }, [user, token])
 
-  // 监听发布成功信号，刷新列表
   useEffect(() => {
     const stored = localStorage.getItem('matchhub_refresh')
     if (stored) {
@@ -187,46 +130,32 @@ export default function MatchHub() {
     }
   }, [hubKey])
 
-  useEffect(() => {
-    loadJoinList()
-  }, [loadJoinList])
+  useEffect(() => { loadJoinList() }, [loadJoinList])
 
   useEffect(() => {
-    if (activeTab === 'my' && user) {
-      loadMyCreated()
-    }
+    if (activeTab === 'my' && user) { loadMyCreated() }
   }, [activeTab, user, loadMyCreated])
 
-  // 在"加入拼"tab，从后端获取已申请的 matchId
   useEffect(() => {
     if (!user) return
     const loadApplied = async () => {
       try {
         const res = await matchApi.getMyParticipating(token)
-        const applied = res.data ?? []
-        setMyAppliedIds(new Set(applied.map(m => m.id)))
+        setMyAppliedIds(new Set((res.data ?? []).map(m => m.id)))
       } catch { /* 静默 */ }
     }
     loadApplied()
   }, [user, token])
 
-  // 申请加入（POST /api/matches/:id/join）
   const handleRequest = async (item) => {
-    if (!user) {
-      alert('请先登录')
-      return
-    }
+    if (!user) { alert('请先登录'); return }
     if (myAppliedIds.has(item.id)) return
-
     try {
       await matchApi.joinMatch(item.id, token)
       setMyAppliedIds(prev => new Set([...prev, item.id]))
-    } catch (err) {
-      alert(err.message || '申请失败')
-    }
+    } catch (err) { alert(err.message || '申请失败') }
   }
 
-  // 删除弹窗
   const handleDeleteClick = (match, e) => {
     e.stopPropagation()
     setDeleteTarget(match)
@@ -238,7 +167,6 @@ export default function MatchHub() {
     setDeleteTarget(null)
   }
 
-  // 同意 / 拒绝
   const handleParticipantAction = (participant, match, e) => {
     e.stopPropagation()
     setPendingParticipant(participant)
@@ -255,21 +183,13 @@ export default function MatchHub() {
         await matchApi.rejectParticipant(pendingMatch.id, pendingParticipant.id, token)
       }
       await loadMyCreated()
-    } catch (err) {
-      alert(err.message || '操作失败')
-    } finally {
-      setActionLoading(false)
-      setPendingParticipant(null)
-      setPendingMatch(null)
-    }
+    } catch (err) { alert(err.message || '操作失败') }
+    finally { setActionLoading(false); setPendingParticipant(null); setPendingMatch(null) }
   }
 
-  // 计算已确认人数（发起者本人 + 所有 CONFIRMED）
   const getConfirmedCount = (match) => {
-    const confirmed = match.participants
-      ? match.participants.filter(p => p.status === 'confirmed').length
-      : 0
-    return confirmed + 1 // +1 发起者本人
+    const confirmed = match.participants ? match.participants.filter(p => p.status === 'confirmed').length : 0
+    return confirmed + 1
   }
 
   return (
